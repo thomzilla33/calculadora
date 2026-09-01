@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Costos — Salentino Coffee Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #EC6E25;
+  --cream: #F9F4ED;
+  --black: #0A0A0A;
+  --brown: #3E2723;
+  --dark-cream: #EDE6DA;
+  --white: #FFFFFF;
+  --orange-subtle: rgba(236,110,37,0.06);
+  --orange-border: rgba(236,110,37,0.15);
+  --green: #2E7D32;
+  --green-bg: rgba(46,125,50,0.08);
+  --yellow: #F57F17;
+  --yellow-bg: rgba(245,127,23,0.08);
+  --red: #C62828;
+  --red-bg: rgba(198,40,40,0.08);
+  --font: 'Space Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--cream);color:var(--brown);line-height:1.65;font-size:14px}
+
+.header{background:var(--black);color:var(--cream);padding:32px 24px 24px;text-align:center}
+.header-logo{height:40px;margin-bottom:12px;filter:brightness(0) saturate(0) invert(1) brightness(1)}
+.header h1{font-size:13px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--orange);margin-bottom:4px}
+.header p{font-size:12px;color:var(--dark-cream);opacity:.7}
+
+.tabs{display:flex;justify-content:center;gap:6px;margin-top:16px}
+.tab{padding:8px 20px;border-radius:4px;border:1px solid rgba(249,244,237,.2);background:0;color:var(--cream);font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.2s}
+.tab.active,.tab:hover{background:var(--orange);color:var(--cream);border-color:var(--orange)}
+
+.container{max-width:820px;margin:0 auto;padding:24px 20px 60px}
+.section{display:none}.section.active{display:block}
+
+.card{background:var(--white);border:1px solid var(--dark-cream);border-radius:4px;padding:24px;margin-bottom:16px}
+.card.accent{border-top:3px solid var(--orange)}
+
+/* Collapsible panel */
+.panel-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.panel-toggle .arrow{transition:transform .2s;font-size:12px;color:var(--orange)}
+.panel-toggle.open .arrow{transform:rotate(180deg)}
+.panel-body{display:none;margin-top:16px}
+.panel-body.open{display:block}
+
+.sec-title{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.sec-num{font-size:11px;font-weight:700;letter-spacing:4px;color:var(--orange);text-transform:uppercase;white-space:nowrap}
+.sec-label{font-size:14px;font-weight:700;color:var(--black)}
+.sec-hint{font-size:11px;color:var(--brown);opacity:.6;font-weight:400;margin-left:4px}
+
+.input-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--dark-cream);flex-wrap:wrap}
+.input-row:last-child{border-bottom:0}
+.input-label{flex:1;min-width:140px;font-size:13px;color:var(--brown)}
+.input-label strong{color:var(--black)}
+.input-hint{font-size:11px;color:var(--brown);opacity:.5;display:block;margin-top:2px}
+.input-field{width:120px}
+.input-field input,.input-field select{width:100%;padding:8px 10px;border:1px solid var(--dark-cream);border-radius:4px;font-family:var(--font);font-size:13px;text-align:right;background:var(--cream);color:var(--black);transition:.2s}
+.input-field input:focus{outline:0;border-color:var(--orange)}
+.input-unit{font-size:11px;color:var(--brown);opacity:.5;min-width:50px}
+
+/* Checkbox */
+.check-row{display:flex;align-items:center;gap:8px;padding:8px 0}
+.check-row input[type="checkbox"]{accent-color:var(--orange);width:16px;height:16px}
+.check-row label{font-size:13px;color:var(--brown);cursor:pointer}
+
+.result-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:4px;margin:6px 0}
+.result-row.subtle{background:var(--cream)}
+.result-row.highlight{background:var(--orange-subtle);border:1px solid var(--orange-border)}
+.result-row.dark{background:var(--black)}
+.result-label{flex:1;font-size:13px}
+.result-value{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--black)}
+.result-value.big{font-size:22px;color:var(--orange)}
+.result-row.dark .result-label{color:var(--cream)}
+.result-row.dark .result-value{color:var(--orange)}
+
+.waterfall{margin:12px 0}
+.wf-bar-wrap{margin:8px 0}
+.wf-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.wf-label span:first-child{color:var(--brown)}
+.wf-label span:last-child{font-weight:700;color:var(--black)}
+.wf-bar{height:6px;border-radius:3px;background:var(--dark-cream);overflow:hidden}
+.wf-fill{height:100%;border-radius:3px;transition:width .3s ease}
+
+/* Presentation cards */
+.pres-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.pres-card{border:1px solid var(--dark-cream);border-radius:4px;padding:16px;text-align:center;transition:.2s;background:var(--white)}
+.pres-card:hover{border-color:var(--orange)}
+.pres-name{font-weight:700;font-size:13px;color:var(--black);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.pres-cost{font-size:18px;font-weight:700;color:var(--brown);margin:6px 0 2px}
+.pres-sub{font-size:10px;color:var(--brown);opacity:.5;text-transform:uppercase;letter-spacing:1px}
+.pres-detail{font-size:12px;color:var(--brown);margin:6px 0;opacity:.7}
+
+/* Price section in card */
+.pres-price-section{margin-top:10px;padding-top:10px;border-top:2px solid var(--dark-cream)}
+.pres-price-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px}
+.pres-price-label{color:var(--brown)}
+.pres-price-val{font-weight:700;color:var(--black)}
+.pres-precio-input{width:100%;padding:8px 10px;border:1px solid var(--dark-cream);border-radius:4px;font-family:var(--font);font-size:15px;font-weight:700;text-align:center;background:var(--cream);color:var(--black);margin:4px 0;-moz-appearance:textfield;appearance:textfield}
+.pres-precio-input::-webkit-outer-spin-button,.pres-precio-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pres-precio-input:focus{outline:0;border-color:var(--orange);background:var(--white)}
+
+/* Margin badge */
+.margin-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:1px}
+.margin-green{background:var(--green-bg);color:var(--green)}
+.margin-yellow{background:var(--yellow-bg);color:var(--yellow)}
+.margin-red{background:var(--red-bg);color:var(--red)}
+
+.pres-breakdown{margin-top:10px;border-top:1px solid var(--dark-cream);padding-top:10px;text-align:left}
+.pres-breakdown .bk-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:var(--brown)}
+.pres-breakdown .bk-row.total{border-top:1px solid var(--dark-cream);margin-top:6px;padding-top:8px;font-weight:700;color:var(--black)}
+.pres-breakdown .bk-row.price-row{color:var(--orange);font-weight:700}
+
+/* Channel comparison table */
+.channel-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.channel-table th{background:var(--black);color:var(--cream);padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.channel-table td{padding:8px 10px;border-bottom:1px solid var(--dark-cream);font-variant-numeric:tabular-nums}
+.channel-table tr:nth-child(even){background:rgba(236,110,37,0.03)}
+.channel-table .warn{color:var(--red);font-weight:700}
+
+.emp-toggle{font-size:12px;color:var(--orange);cursor:pointer;font-weight:700;margin-top:4px;display:inline-block;border-bottom:1px dashed var(--orange)}
+.emp-detail{display:none;margin-top:12px;padding:16px;background:var(--cream);border-radius:4px;border:1px solid var(--dark-cream)}
+.emp-detail.open{display:block}
+.emp-detail strong{font-size:12px;color:var(--black);text-transform:uppercase;letter-spacing:1px}
+.emp-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:var(--brown)}
+.emp-row.total{border-top:1px solid var(--dark-cream);font-weight:700;color:var(--black);margin-top:6px;padding-top:8px}
+
+.sep{text-align:center;color:var(--orange);font-size:14px;font-weight:700;letter-spacing:4px;margin:8px 0;opacity:.6}
+.divider{height:1px;background:var(--dark-cream);margin:16px 0}
+.num{font-variant-numeric:tabular-nums}
+.mt-8{margin-top:8px}
+.mt-16{margin-top:16px}
+.text-sm{font-size:12px;color:var(--brown);opacity:.6}
+
+/* Inline input grid */
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+@media(max-width:600px){.param-grid{grid-template-columns:1fr}}
+
+/* Explainer card */
+.explainer{background:var(--black);color:var(--cream);border-radius:4px;padding:20px;margin-bottom:16px}
+.explainer .ex-title{font-size:11px;font-weight:700;letter-spacing:4px;color:var(--orange);text-transform:uppercase;margin-bottom:12px}
+.explainer p{font-size:12px;line-height:1.7;color:var(--dark-cream);margin-bottom:8px}
+.explainer strong{color:var(--cream)}
+.explainer .ex-highlight{color:var(--orange);font-weight:700}
+.ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.ex-box{background:rgba(255,255,255,0.06);border-radius:4px;padding:12px;text-align:center}
+.ex-box .ex-val{font-size:18px;font-weight:700;color:var(--orange);margin-bottom:2px}
+.ex-box .ex-lbl{font-size:10px;color:var(--dark-cream);text-transform:uppercase;letter-spacing:1px}
+@media(max-width:600px){.ex-grid{grid-template-columns:1fr}}
+
+/* Load prices button */
+.btn-load{display:inline-block;padding:8px 16px;border-radius:4px;border:1px solid var(--orange);background:transparent;color:var(--orange);font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.2s;margin:8px 4px 0 0}
+.btn-load:hover{background:var(--orange);color:var(--cream)}
+.btn-load.active{background:var(--orange);color:var(--cream)}
+
+/* Break-even row */
+.pe-row{margin-top:8px;padding:8px 10px;border-radius:4px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.5px}
+.pe-viable{background:var(--green-bg);color:var(--green)}
+.pe-warning{background:var(--yellow-bg);color:var(--yellow)}
+.pe-danger{background:var(--red-bg);color:var(--red)}
+.pe-val{font-size:16px;display:block;margin-top:2px}
+
+/* Price input improved */
+.price-input-wrap{position:relative;margin:4px 0}
+.price-input-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--orange);text-align:center;margin-bottom:4px;font-weight:700}
+.price-suggested{font-size:11px;color:var(--brown);opacity:.5;text-align:center;margin-top:2px}
+
+.footer{background:var(--black);padding:24px;text-align:center;margin-top:40px}
+.footer-logo{height:28px;filter:brightness(0) saturate(0) invert(1) brightness(1);margin-bottom:8px}
+.footer p{font-size:11px;color:var(--orange);font-style:italic}
+
+@media print {
+  .header,.footer,.tabs,.panel-toggle,.btn-load,.sep,.explainer{display:none !important}
+  .section{display:block !important}
+  .card{break-inside:avoid;border:1px solid #ddd}
+  body{background:#fff;font-size:12px}
+}
+
+@media(max-width:700px){
+  body{font-size:13px}
+  .header{padding:20px 16px 16px}
+  .header h1{font-size:11px;letter-spacing:2px}
+  .header p{font-size:11px}
+  .container{padding:16px 12px 40px}
+  .card{padding:16px 14px}
+  .tabs{flex-wrap:wrap;gap:4px;margin-top:12px}
+  .tab{font-size:10px;padding:6px 10px;letter-spacing:.5px;flex:1 1 auto;text-align:center;min-width:0}
+  .sec-title{gap:6px;margin-bottom:12px}
+  .sec-num{font-size:10px;letter-spacing:2px}
+  .sec-label{font-size:13px}
+  .sec-hint{display:block;margin-left:0;margin-top:2px;width:100%}
+  .input-row{flex-direction:column;align-items:flex-start;gap:4px;padding:8px 0}
+  .input-label{min-width:0;width:100%}
+  .input-field{width:100%}
+  .input-field input,.input-field select{font-size:15px;padding:10px 12px}
+  .input-unit{font-size:10px}
+  .pres-grid{grid-template-columns:1fr}
+  .pres-card{padding:14px}
+  .pres-precio-input{font-size:18px;padding:10px 12px}
+  .result-value.big{font-size:18px}
+  .result-row{padding:10px 12px;flex-wrap:wrap}
+  .result-label{font-size:12px;min-width:0}
+  .result-value{font-size:14px}
+  .sep{font-size:12px;margin:6px 0}
+  .param-grid{grid-template-columns:1fr}
+  .ex-grid{grid-template-columns:1fr}
+  .btn-load{font-size:10px;padding:6px 10px;letter-spacing:.5px}
+  .channel-table{font-size:10px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .channel-table th,.channel-table td{padding:6px 5px;white-space:nowrap}
+  .margin-badge{font-size:10px;padding:2px 5px}
+  .pe-row{font-size:10px}
+  .pe-val{font-size:14px}
+  .explainer{padding:16px}
+  .explainer p{font-size:11px}
+  .ex-box .ex-val{font-size:16px}
+  .footer{padding:16px}
+  .pres-breakdown .bk-row{font-size:11px}
+  .price-input-label{font-size:9px}
+  .price-suggested{font-size:10px}
+  .pres-price-row{font-size:11px}
+  .text-sm{font-size:11px}
+  .emp-detail{padding:12px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://salentino.co/cdn/shop/files/Recurso_1.png?v=1739126820&width=600" alt="Salentino" class="header-logo">
+  <h1>calculadora de costos</h1>
+  <p>de la materia prima al producto final // cada peso explicado</p>
+  <div class="tabs">
+    <button class="tab active" onclick="showSec('especial')">Especiales</button>
+    <button class="tab" onclick="showSec('tradicional')">Tradicional</button>
+    <button class="tab" onclick="showSec('coldbrew')">Cold Brew</button>
+    <button class="tab" onclick="showSec('eventos')">Eventos</button>
+    <button class="tab" onclick="showSec('resumen')">Resumen // PE</button>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ================================================================ -->
+<!-- PARAMETROS GLOBALES (shared) -->
+<!-- ================================================================ -->
+<div class="card" style="border-left:3px solid var(--orange)">
+  <div class="panel-toggle" onclick="togglePanel(this)">
+    <div class="sec-title" style="margin-bottom:0">
+      <span class="sec-num">// //</span>
+      <span class="sec-label">Parametros globales</span>
+      <span class="sec-hint">comision, IVA, mano de obra, canales</span>
+    </div>
+    <span class="arrow">&#9660;</span>
+  </div>
+  <div class="panel-body" id="global-panel">
+    <div class="param-grid">
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Comision pasarela</strong>
+          <span class="input-hint">Bold / MercadoPago</span>
+        </div>
+        <div class="input-field"><input type="number" id="g-comision" value="3.5" step="0.1" oninput="recalcAll()"></div>
+        <div class="input-unit">%</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">
+          <strong>IVA</strong>
+        </div>
+        <div class="input-field"><input type="number" id="g-iva" value="5" oninput="recalcAll()"></div>
+        <div class="input-unit">%</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Valor hora mano de obra</strong>
+          <span class="input-hint">$4M salario / 160 hrs</span>
+        </div>
+        <div class="input-field"><input type="number" id="g-labor-rate" value="25000" oninput="recalcAll()"></div>
+        <div class="input-unit">$/hr</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Minutos empaque por bolsa</strong>
+          <span class="input-hint">pesar, llenar, sellar, etiquetar</span>
+        </div>
+        <div class="input-field"><input type="number" id="g-min-bolsa" value="4" step="1" oninput="recalcAll()"></div>
+        <div class="input-unit">min</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="param-grid">
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Margen objetivo Directo</strong>
+        </div>
+        <div class="input-field"><input type="number" id="g-margen-dir" value="60" min="0" max="99" step="1" oninput="recalcAll()"></div>
+        <div class="input-unit">%</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Margen objetivo B2B</strong>
+        </div>
+        <div class="input-field"><input type="number" id="g-margen-b2b" value="50" min="0" max="99" step="1" oninput="recalcAll()"></div>
+        <div class="input-unit">%</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Desc. Tier 1</strong>
+          <span class="input-hint">pedidos pequenos</span>
+        </div>
+        <div class="input-field"><input type="number" id="g-desc-t1" value="25" min="0" max="60" step="1" oninput="recalcAll()"></div>
+        <div class="input-unit">%</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Desc. Tier 2</strong>
+          <span class="input-hint">pedidos estandar</span>
+        </div>
+        <div class="input-field"><input type="number" id="g-desc-t2" value="30" min="0" max="60" step="1" oninput="recalcAll()"></div>
+        <div class="input-unit">%</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Desc. Tier 3</strong>
+          <span class="input-hint">pedidos grandes</span>
+        </div>
+        <div class="input-field"><input type="number" id="g-desc-t3" value="35" min="0" max="60" step="1" oninput="recalcAll()"></div>
+        <div class="input-unit">%</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:8px">Envio por unidad</div>
+    <div class="param-grid">
+      <div class="input-row">
+        <div class="input-label"><strong>Envio Directo</strong></div>
+        <div class="input-field"><input type="number" id="g-envio-dir" value="0" min="0" oninput="recalcAll()"></div>
+        <div class="input-unit">$/ud</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Envio B2B</strong></div>
+        <div class="input-field"><input type="number" id="g-envio-b2b" value="0" min="0" oninput="recalcAll()"></div>
+        <div class="input-unit">$/ud</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Envio Distribuidor</strong></div>
+        <div class="input-field"><input type="number" id="g-envio-dist" value="0" min="0" oninput="recalcAll()"></div>
+        <div class="input-unit">$/ud</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="check-row">
+      <input type="checkbox" id="g-iva-toggle" checked onchange="recalcAll()">
+      <label for="g-iva-toggle"><strong>Precios incluyen IVA</strong> — margenes se calculan sobre base sin IVA</label>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:8px">Costos fijos mensuales</div>
+    <div class="param-grid">
+      <div class="input-row"><div class="input-label"><strong>Arriendo</strong></div><div class="input-field"><input type="number" id="fijo-arriendo" value="2000000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Salarios</strong></div><div class="input-field"><input type="number" id="fijo-salarios" value="2500000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Servicios (agua, luz, gas)</strong></div><div class="input-field"><input type="number" id="fijo-servicios" value="350000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Shopify / plataforma</strong></div><div class="input-field"><input type="number" id="fijo-shopify" value="250000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Contabilidad</strong></div><div class="input-field"><input type="number" id="fijo-contabilidad" value="400000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Gasolina / transporte</strong></div><div class="input-field"><input type="number" id="fijo-gasolina" value="300000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Telefono + internet</strong></div><div class="input-field"><input type="number" id="fijo-telefono" value="150000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Marketing</strong></div><div class="input-field"><input type="number" id="fijo-marketing" value="500000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Seguros</strong></div><div class="input-field"><input type="number" id="fijo-seguros" value="100000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+      <div class="input-row"><div class="input-label"><strong>Otros</strong></div><div class="input-field"><input type="number" id="fijo-otros" value="450000" min="0" oninput="sumFijos()"></div><div class="input-unit">$/mes</div></div>
+    </div>
+    <div class="result-row highlight" style="margin-top:8px">
+      <div class="result-label"><strong>Total costos fijos / mes</strong></div>
+      <div class="result-value num" id="g-fijos-total"></div>
+    </div>
+    <input type="hidden" id="g-fijos" value="7000000">
+    <div class="param-grid" style="margin-top:8px">
+      <div class="input-row">
+        <div class="input-label">
+          <strong>Unidades estimadas / mes</strong>
+          <span class="input-hint">total bolsas + botellas que vendes</span>
+        </div>
+        <div class="input-field"><input type="number" id="g-unidades" value="300" min="1" oninput="recalcAll()"></div>
+        <div class="input-unit">uds</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="margin-top:4px">
+      <button class="btn-load" onclick="loadPrices('trad')">Cargar precios Tradicional</button>
+      <button class="btn-load" onclick="loadPrices('esp')">Cargar precios Especiales</button>
+      <button class="btn-load" onclick="loadPrices('cb')">Cargar precios Cold Brew</button>
+      <button class="btn-load" onclick="clearPrices()" style="border-color:var(--brown);color:var(--brown)">Limpiar precios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Explainer: Por que este margen? -->
+<div class="explainer">
+  <div class="ex-title">// por que importa el margen?</div>
+  <p>Tu margen no es solo "ganancia". De ahi sale todo lo que necesitas para operar: <strong>arriendo, salario, Shopify, gasolina, servicios</strong>. Si el margen no cubre los costos fijos, la operacion no es viable.</p>
+  <div class="ex-grid" id="ex-grid"></div>
+  <p style="margin-top:8px">Escribe tu precio real en cada tarjeta de producto para ver el <span class="ex-highlight">margen verdadero</span>. O usa el boton "Cargar precios" arriba para ver tus margenes actuales de una vez.</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- ESPECIALES -->
+<!-- ================================================================ -->
+<div id="sec-especial" class="section active">
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">01 //</span>
+      <span class="sec-label">Costo del cafe verde</span>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Origen / tipo</strong>
+        <span class="input-hint">Selecciona el tipo de verde</span>
+      </div>
+      <div class="input-field" style="width:180px">
+        <select id="esp-tipo" onchange="onEspTipo()" style="text-align:left">
+          <option value="60000">Borbon Estandar</option>
+          <option value="105000">Borbon Premium</option>
+          <option value="custom">Otro (manual)</option>
+        </select>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Precio del cafe verde</strong>
+        <span class="input-hint">Lo que pagas por kilo de verde sin tostar</span>
+      </div>
+      <div class="input-field"><input type="number" id="esp-verde" value="60000" min="0" oninput="calcEsp()"></div>
+      <div class="input-unit">$/kg</div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">02 //</span>
+      <span class="sec-label">Costo de tueste propio</span>
+      <span class="sec-hint">tostamos en casa</span>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Inversion tostadora</strong></div>
+      <div class="input-field"><input type="number" id="esp-inv" value="15000000" oninput="calcEsp()"></div>
+      <div class="input-unit">$</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Vida util</strong></div>
+      <div class="input-field"><input type="number" id="esp-vida" value="7" oninput="calcEsp()"></div>
+      <div class="input-unit">anos</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Electricidad asignada</strong>
+        <span class="input-hint">$75,000/mes total x 60% tueste</span>
+      </div>
+      <div class="input-field"><input type="number" id="esp-elec" value="45000" oninput="calcEsp()"></div>
+      <div class="input-unit">$/mes</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Mantenimiento</strong>
+        <span class="input-hint">3% anual de inversion / 12</span>
+      </div>
+      <div class="input-field"><input type="number" id="esp-mant" value="37500" oninput="calcEsp()"></div>
+      <div class="input-unit">$/mes</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Volumen de tueste</strong>
+        <span class="input-hint">Kilos de verde que tuestas al mes</span>
+      </div>
+      <div class="input-field"><input type="number" id="esp-vol" value="15" oninput="calcEsp()"></div>
+      <div class="input-unit">kg/mes</div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-row subtle">
+      <div class="result-label">Depreciacion mensual</div>
+      <div class="result-value num" id="esp-dep-val"></div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Costo fijo mensual tueste</div>
+      <div class="result-value num" id="esp-fijo-val"></div>
+    </div>
+    <div class="result-row highlight">
+      <div class="result-label"><strong>Costo de tueste por kg verde</strong></div>
+      <div class="result-value num" id="esp-tueste-kg"></div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">03 //</span>
+      <span class="sec-label">Rendimiento y costo tostado final</span>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Factor de rendimiento</strong>
+        <span class="input-hint">1 kg verde = 0.82 kg tostado (pierde ~18% en tueste)</span>
+      </div>
+      <div class="input-field"><input type="number" id="esp-factor" value="0.82" step="0.01" oninput="calcEsp()"></div>
+      <div class="input-unit">kg/kg</div>
+    </div>
+    <div class="divider"></div>
+    <div class="waterfall" id="esp-waterfall"></div>
+    <div class="result-row dark">
+      <div class="result-label"><strong>Costo por kg de cafe tostado</strong></div>
+      <div class="result-value num big" id="esp-tostado-kg"></div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Costo por gramo de cafe tostado</div>
+      <div class="result-value num" id="esp-tostado-g"></div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">04 //</span>
+      <span class="sec-label">Costo + precio por presentacion</span>
+      <span class="sec-hint">cafe + empaque + mano de obra + margen</span>
+    </div>
+    <span class="emp-toggle" onclick="toggleEmp('esp')">ver detalle del empaque</span>
+    <div class="emp-detail" id="emp-esp-detail">
+      <strong>Bolsa 250g</strong>
+      <div class="emp-row"><span>Etiqueta</span><span>$474</span></div>
+      <div class="emp-row"><span>Bolsa</span><span>$810</span></div>
+      <div class="emp-row"><span>Valvula desgasificadora</span><span>$298</span></div>
+      <div class="emp-row"><span>Peelstick (resellable)</span><span>$421</span></div>
+      <div class="emp-row"><span>Sello lacre</span><span>$120</span></div>
+      <div class="emp-row"><span>Sticker termico</span><span>$42</span></div>
+      <div class="emp-row total"><span>Total empaque 250g</span><span>$2,165</span></div>
+      <br>
+      <strong>Bolsa 454g / 1kg / 2.5kg</strong>
+      <div class="emp-row"><span>Etiqueta</span><span>$474</span></div>
+      <div class="emp-row"><span>Bolsa (mas grande)</span><span>$976</span></div>
+      <div class="emp-row"><span>Valvula desgasificadora</span><span>$298</span></div>
+      <div class="emp-row"><span>Peelstick</span><span>$421</span></div>
+      <div class="emp-row"><span>Sello lacre</span><span>$120</span></div>
+      <div class="emp-row"><span>Sticker termico</span><span>$42</span></div>
+      <div class="emp-row total"><span>Total empaque 454g+</span><span>$2,331</span></div>
+    </div>
+    <div class="pres-grid mt-16" id="esp-pres"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">05 //</span>
+      <span class="sec-label">Comparacion por canal</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Precio sugerido segun margen objetivo por canal. Distribuidor = precio directo x (1 - descuento%). El margen del distribuidor es el resultado, no un input.</p>
+    <div style="overflow-x:auto" id="esp-channels"></div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- TRADICIONAL -->
+<!-- ================================================================ -->
+<div id="sec-tradicional" class="section">
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">01 //</span>
+      <span class="sec-label">Costo del cafe pergamino</span>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Precio del pergamino Caturra</strong>
+        <span class="input-hint">Cafe seco en pergamino, antes de trilla</span>
+      </div>
+      <div class="input-field"><input type="number" id="trad-perg" value="20800" oninput="calcTrad()"></div>
+      <div class="input-unit">$/kg</div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">02 //</span>
+      <span class="sec-label">Trilla + tueste externo</span>
+      <span class="sec-hint">servicio tercerizado</span>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Costo trilla + tueste + seleccion</strong>
+        <span class="input-hint">Lo que cobra el tostador externo por kg de pergamino</span>
+      </div>
+      <div class="input-field"><input type="number" id="trad-tueste" value="10550" oninput="calcTrad()"></div>
+      <div class="input-unit">$/kg perg.</div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-row subtle">
+      <div class="result-label">Costo total antes de rendimiento</div>
+      <div class="result-value num" id="trad-subtotal"></div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">03 //</span>
+      <span class="sec-label">Rendimiento y costo tostado final</span>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Factor de rendimiento</strong>
+        <span class="input-hint">1 kg pergamino = 0.80 kg tostado (pierde trilla + tueste ~20%)</span>
+      </div>
+      <div class="input-field"><input type="number" id="trad-factor" value="0.80" step="0.01" oninput="calcTrad()"></div>
+      <div class="input-unit">kg/kg</div>
+    </div>
+    <div class="divider"></div>
+    <div class="waterfall" id="trad-waterfall"></div>
+    <div class="result-row dark">
+      <div class="result-label"><strong>Costo por kg de cafe tostado</strong></div>
+      <div class="result-value num big" id="trad-tostado-kg"></div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Costo por gramo de cafe tostado</div>
+      <div class="result-value num" id="trad-tostado-g"></div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">04 //</span>
+      <span class="sec-label">Costo + precio por presentacion</span>
+      <span class="sec-hint">cafe + empaque + mano de obra + margen</span>
+    </div>
+    <span class="emp-toggle" onclick="toggleEmp('trad')">ver detalle del empaque</span>
+    <div class="emp-detail" id="emp-trad-detail">
+      <strong>Bolsa 250g</strong>
+      <div class="emp-row"><span>Etiqueta</span><span>$474</span></div>
+      <div class="emp-row"><span>Bolsa</span><span>$810</span></div>
+      <div class="emp-row"><span>Valvula desgasificadora</span><span>$298</span></div>
+      <div class="emp-row"><span>Peelstick (resellable)</span><span>$421</span></div>
+      <div class="emp-row"><span>Sello lacre</span><span>$120</span></div>
+      <div class="emp-row"><span>Sticker termico</span><span>$42</span></div>
+      <div class="emp-row total"><span>Total empaque 250g</span><span>$2,165</span></div>
+      <br>
+      <strong>Bolsa 454g / 1kg / 2.5kg</strong>
+      <div class="emp-row"><span>Etiqueta</span><span>$474</span></div>
+      <div class="emp-row"><span>Bolsa (mas grande)</span><span>$976</span></div>
+      <div class="emp-row"><span>Valvula desgasificadora</span><span>$298</span></div>
+      <div class="emp-row"><span>Peelstick</span><span>$421</span></div>
+      <div class="emp-row"><span>Sello lacre</span><span>$120</span></div>
+      <div class="emp-row"><span>Sticker termico</span><span>$42</span></div>
+      <div class="emp-row total"><span>Total empaque 454g+</span><span>$2,331</span></div>
+    </div>
+    <div class="pres-grid mt-16" id="trad-pres"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">05 //</span>
+      <span class="sec-label">Comparacion por canal</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Precio sugerido segun margen objetivo por canal. Distribuidor = precio directo x (1 - descuento%).</p>
+    <div style="overflow-x:auto" id="trad-channels"></div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- COLD BREW -->
+<!-- ================================================================ -->
+<div id="sec-coldbrew" class="section">
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">01 //</span>
+      <span class="sec-label">Cafe para cold brew</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">El cold brew usa cafe tostado tradicional (Caturra). El costo depende del pergamino y tueste externo.</p>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Costo cafe tostado tradicional</strong>
+        <span class="input-hint">Se sincroniza desde la pestana Tradicional</span>
+      </div>
+      <div class="input-field"><input type="number" id="cb-tostado" value="39188" oninput="calcCB()"></div>
+      <div class="input-unit">$/kg</div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">02 //</span>
+      <span class="sec-label">Rendimiento por lote</span>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Cafe molido por lote</strong>
+        <span class="input-hint">Cantidad de cafe tostado que va al lote</span>
+      </div>
+      <div class="input-field"><input type="number" id="cb-lote" value="1.5" step="0.1" oninput="calcCB()"></div>
+      <div class="input-unit">kg</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Agua por lote</strong></div>
+      <div class="input-field"><input type="number" id="cb-agua" value="16" oninput="calcCB()"></div>
+      <div class="input-unit">litros</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Botellas por lote (250ml)</strong></div>
+      <div class="input-field"><input type="number" id="cb-botellas" value="55" oninput="calcCB()"></div>
+      <div class="input-unit">unidades</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Minutos labor por lote</strong>
+        <span class="input-hint">preparacion + embotellado + etiquetado</span>
+      </div>
+      <div class="input-field"><input type="number" id="cb-min-lote" value="45" oninput="calcCB()"></div>
+      <div class="input-unit">min</div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-row subtle">
+      <div class="result-label">Costo del cafe por lote</div>
+      <div class="result-value num" id="cb-lote-costo"></div>
+    </div>
+    <div class="result-row highlight">
+      <div class="result-label"><strong>Costo del cafe por botella</strong></div>
+      <div class="result-value num" id="cb-cafe-bot"></div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">03 //</span>
+      <span class="sec-label">Volumen de produccion</span>
+      <span class="sec-hint">a mayor volumen, menor costo por unidad</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">El overhead mensual (arriendo, equipos) se diluye entre mas botellas. A mayor volumen, menor costo por unidad.</p>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Lotes por mes</strong>
+        <span class="input-hint">Cuantas veces produces un lote completo al mes</span>
+      </div>
+      <div class="input-field"><input type="number" id="cb-lotes-mes" value="4" min="1" oninput="calcCB()"></div>
+      <div class="input-unit">lotes</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Costo fijo por lote</strong>
+        <span class="input-hint">gas, agua, limpieza, setup por cada lote</span>
+      </div>
+      <div class="input-field"><input type="number" id="cb-fijo-lote" value="15000" min="0" oninput="calcCB()"></div>
+      <div class="input-unit">$/lote</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Overhead mensual CB</strong>
+        <span class="input-hint">Porcion de arriendo, equipos, seguros asignada a cold brew</span>
+      </div>
+      <div class="input-field"><input type="number" id="cb-overhead-mes" value="500000" min="0" oninput="calcCB()"></div>
+      <div class="input-unit">$/mes</div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-row subtle">
+      <div class="result-label">Botellas totales / mes</div>
+      <div class="result-value num" id="cb-bots-mes"></div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Costo fijo lote / botella</div>
+      <div class="result-value num" id="cb-fijo-bot"></div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Overhead mensual / botella</div>
+      <div class="result-value num" id="cb-overhead-bot"></div>
+    </div>
+    <div class="result-row highlight">
+      <div class="result-label"><strong>Costo total por botella (cafe + fijos)</strong></div>
+      <div class="result-value num" id="cb-total-bot"></div>
+    </div>
+
+    <div class="divider" style="margin:16px 0"></div>
+    <p class="text-sm" style="margin-bottom:8px;font-weight:700">Simulador de escala // costo por botella segun lotes/mes</p>
+    <div id="cb-volume-table" style="overflow-x:auto"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">04 //</span>
+      <span class="sec-label">Materiales por botella 250ml</span>
+    </div>
+    <span class="emp-toggle" onclick="toggleEmp('cb')">ver detalle de materiales</span>
+    <div class="emp-detail" id="emp-cb-detail">
+      <div class="emp-row"><span>Botella PET</span><span>$621</span></div>
+      <div class="emp-row"><span>Tapa de seguridad</span><span>$100</span></div>
+      <div class="emp-row"><span>Etiqueta</span><span>$277</span></div>
+      <div class="emp-row"><span>Filtro tela (amortizado)</span><span>$38</span></div>
+      <div class="emp-row"><span>Agua (proporcional)</span><span>$7</span></div>
+      <div class="emp-row total"><span>Total materiales/botella</span><span>$1,043</span></div>
+    </div>
+    <div class="result-row subtle mt-8">
+      <div class="result-label">Empaque por botella</div>
+      <div class="result-value num">$1,043</div>
+    </div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">05 //</span>
+      <span class="sec-label">Costo + precio por presentacion</span>
+      <span class="sec-hint">cafe + materiales + labor + fijo lote + margen</span>
+    </div>
+    <span class="emp-toggle" onclick="toggleEmp('cb-extra')">ver detalle empaque 4-pack y galon</span>
+    <div class="emp-detail" id="emp-cb-extra-detail">
+      <strong>4-Pack (4 botellas + caja)</strong>
+      <div class="emp-row"><span>4 x empaque botella ($1,043)</span><span>$4,172</span></div>
+      <div class="emp-row"><span>Caja carton 4-pack</span><span>$1,500</span></div>
+      <div class="emp-row total"><span>Total empaque 4-pack</span><span>$5,672</span></div>
+      <br>
+      <strong>Galon (3.8L)</strong>
+      <div class="emp-row"><span>Bolsa galon</span><span>$3,378</span></div>
+      <div class="emp-row"><span>Etiqueta galon</span><span>$277</span></div>
+      <div class="emp-row total"><span>Total empaque galon</span><span>$3,655</span></div>
+    </div>
+    <div class="pres-grid mt-16" id="cb-pres"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">06 //</span>
+      <span class="sec-label">Comparacion por canal</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Precio sugerido segun margen objetivo por canal. Distribuidor = precio directo x (1 - descuento%).</p>
+    <div style="overflow-x:auto" id="cb-channels"></div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- EVENTOS -->
+<!-- ================================================================ -->
+<div id="sec-eventos" class="section">
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">01 //</span>
+      <span class="sec-label">Bebidas cold brew para eventos</span>
+      <span class="sec-hint">galon dividido en vasos de 200ml</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Usamos el galon de Cold Brew (3.8L) y lo dividimos en vasos de 200ml con diferentes mezclas: solo, con leche, o con agua tonica.</p>
+    <div class="input-row">
+      <div class="input-label"><strong>Costo del galon CB</strong><span class="input-hint">Se calcula desde la pestana Cold Brew</span></div>
+      <div class="input-field"><input type="number" id="ev-galon-costo" value="0" readonly style="opacity:.6"></div>
+      <div class="input-unit">$/galon</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>ml de Cold Brew por vaso</strong><span class="input-hint">Porcion de CB concentrado en cada vaso</span></div>
+      <div class="input-field"><input type="number" id="ev-cb-ml" value="200" min="50" max="400" step="10" oninput="calcEventos()"></div>
+      <div class="input-unit">ml</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Costo vaso desechable (12oz)</strong></div>
+      <div class="input-field"><input type="number" id="ev-vaso" value="500" min="0" oninput="calcEventos()"></div>
+      <div class="input-unit">$/vaso</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Costo hielo por vaso</strong></div>
+      <div class="input-field"><input type="number" id="ev-hielo" value="200" min="0" oninput="calcEventos()"></div>
+      <div class="input-unit">$/vaso</div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:8px">Mezclas disponibles</div>
+    <div class="input-row">
+      <div class="input-label"><strong>Leche</strong><span class="input-hint">Porcion que completa el vaso (12oz = 355ml)</span></div>
+      <div class="input-field"><input type="number" id="ev-leche-costo" value="3500" min="0" oninput="calcEventos()"></div>
+      <div class="input-unit">$/litro</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Agua tonica</strong></div>
+      <div class="input-field"><input type="number" id="ev-tonica-costo" value="6000" min="0" oninput="calcEventos()"></div>
+      <div class="input-unit">$/litro</div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-row subtle">
+      <div class="result-label">Vasos por galon (3.8L)</div>
+      <div class="result-value num" id="ev-vasos-galon"></div>
+    </div>
+    <div class="pres-grid mt-16" id="ev-cb-pres"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">02 //</span>
+      <span class="sec-label">Cafe caliente Aeropress</span>
+      <span class="sec-hint">cafe tradicional preparado en sitio</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Preparamos cafe caliente con Aeropress usando cafe tostado tradicional. Rango de 12-14g de cafe por 160ml de agua caliente.</p>
+    <div class="input-row">
+      <div class="input-label"><strong>Costo cafe tostado (trad)</strong><span class="input-hint">Se sincroniza desde pestana Tradicional</span></div>
+      <div class="input-field"><input type="number" id="ev-trad-costo" value="0" readonly style="opacity:.6"></div>
+      <div class="input-unit">$/kg</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Gramos de cafe por taza</strong><span class="input-hint">Rango tipico: 12-14g</span></div>
+      <div class="input-field"><input type="number" id="ev-gramos" value="13" min="8" max="20" step="1" oninput="calcEventos()"></div>
+      <div class="input-unit">g</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Agua por taza</strong></div>
+      <div class="input-field"><input type="number" id="ev-agua-ml" value="160" min="100" max="300" step="10" oninput="calcEventos()"></div>
+      <div class="input-unit">ml</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Costo vaso caliente + tapa</strong></div>
+      <div class="input-field"><input type="number" id="ev-vaso-cal" value="600" min="0" oninput="calcEventos()"></div>
+      <div class="input-unit">$/vaso</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Costo filtro Aeropress</strong><span class="input-hint">Precio unitario del filtro de papel</span></div>
+      <div class="input-field"><input type="number" id="ev-filtro" value="100" min="0" oninput="calcEventos()"></div>
+      <div class="input-unit">$/filtro</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label"><strong>Costo azucar/mezclador</strong></div>
+      <div class="input-field"><input type="number" id="ev-extras" value="100" min="0" oninput="calcEventos()"></div>
+      <div class="input-unit">$/taza</div>
+    </div>
+    <div class="divider"></div>
+    <div class="pres-grid mt-16" id="ev-hot-pres"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">03 //</span>
+      <span class="sec-label">Resumen evento</span>
+      <span class="sec-hint">cuantos vasos, cuanto cobrar</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Define el tamano del evento y ve el costo total, precio sugerido por vaso, y utilidad.</p>
+    <div class="param-grid">
+      <div class="input-row">
+        <div class="input-label"><strong>Vasos frios (CB)</strong></div>
+        <div class="input-field"><input type="number" id="ev-qty-frios" value="50" min="0" oninput="calcEventos()"></div>
+        <div class="input-unit">vasos</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Vasos calientes</strong></div>
+        <div class="input-field"><input type="number" id="ev-qty-calientes" value="30" min="0" oninput="calcEventos()"></div>
+        <div class="input-unit">vasos</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Precio venta por vaso</strong></div>
+        <div class="input-field"><input type="number" id="ev-precio-vaso" value="8000" min="0" oninput="calcEventos()"></div>
+        <div class="input-unit">$/vaso</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Logistica evento</strong><span class="input-hint">transporte, mesa, setup, hora</span></div>
+        <div class="input-field"><input type="number" id="ev-logistica" value="150000" min="0" oninput="calcEventos()"></div>
+        <div class="input-unit">$/evento</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div id="ev-resumen"></div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- RESUMEN // PUNTO DE EQUILIBRIO -->
+<!-- ================================================================ -->
+<div id="sec-resumen" class="section">
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">01 //</span>
+      <span class="sec-label">Comparacion lado a lado</span>
+      <span class="sec-hint">todos los productos en una vista</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Costo base, precio (directo), margen y utilidad de cada producto. Usa los precios cargados o los sugeridos.</p>
+    <div style="overflow-x:auto" id="res-sidebyside"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">02 //</span>
+      <span class="sec-label">Punto de equilibrio por producto</span>
+      <span class="sec-hint">cuantas unidades necesitas vender de SOLO este producto</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">PE = costos fijos mensuales / utilidad por unidad. Muestra cuantas unidades de un solo producto cubririan todos los fijos.</p>
+    <div style="overflow-x:auto" id="res-pe-product"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">03 //</span>
+      <span class="sec-label">Punto de equilibrio combinado</span>
+      <span class="sec-hint">mix real de productos</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Define cuantas unidades vendes de cada producto al mes. Calcula el PE del mix completo.</p>
+    <div id="res-mix-inputs"></div>
+    <div class="divider"></div>
+    <div id="res-mix-result"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card accent">
+    <div class="sec-title">
+      <span class="sec-num">04 //</span>
+      <span class="sec-label">Simulador P&L mensual</span>
+      <span class="sec-hint">ingreso, costo, utilidad, viabilidad</span>
+    </div>
+    <p class="text-sm" style="margin-bottom:12px">Basado en el mix de arriba, proyecta el P&L mensual.</p>
+    <div id="res-pnl"></div>
+  </div>
+
+  <div class="sep">// // //</div>
+
+  <div class="card" style="background:var(--black);color:var(--cream)">
+    <div class="sec-title">
+      <span class="sec-num" style="color:var(--orange)">05 //</span>
+      <span class="sec-label" style="color:var(--cream)">Tarjeta de precios</span>
+      <span class="sec-hint" style="color:var(--dark-cream)">version imprimible</span>
+    </div>
+    <div id="res-price-card"></div>
+    <button class="btn-load" onclick="window.print()" style="margin-top:12px;border-color:var(--orange)">Imprimir / PDF</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<div class="footer">
+  <img src="https://salentino.co/cdn/shop/files/Recurso_1.png?v=1739126820&width=600" alt="Salentino" class="footer-logo">
+  <p>lento de origen // rapido de tomar</p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const V = id => parseFloat($(id).value) || 0;
+const F = n => '$' + Math.round(n).toLocaleString('es-CO');
+const Fd = (n, d) => '$' + n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const Fp = n => (n * 100).toFixed(1) + '%';
+
+const EMP_250 = 2165;
+const EMP_454 = 2331;
+const EMP_CB = 1043;
+const EMP_4P = 5672;
+const EMP_GAL = 3655;
+
+// ── Global params ──
+const FIJO_IDS = ['fijo-arriendo','fijo-salarios','fijo-servicios','fijo-shopify','fijo-contabilidad','fijo-gasolina','fijo-telefono','fijo-marketing','fijo-seguros','fijo-otros'];
+
+function sumFijos() {
+  const total = FIJO_IDS.reduce((s, id) => s + V(id), 0);
+  $('g-fijos').value = total;
+  $('g-fijos-total').textContent = F(total);
+  recalcAll();
+}
+
+function G() {
+  const comision = V('g-comision') / 100;
+  const iva = V('g-iva') / 100;
+  const inclIVA = $('g-iva-toggle').checked;
+  const laborRate = V('g-labor-rate');
+  const minBolsa = V('g-min-bolsa');
+  const laborBolsa = (minBolsa / 60) * laborRate;
+  const margenDir = V('g-margen-dir') / 100;
+  const margenB2B = V('g-margen-b2b') / 100;
+  const descT1 = V('g-desc-t1') / 100;
+  const descT2 = V('g-desc-t2') / 100;
+  const descT3 = V('g-desc-t3') / 100;
+  const envioDir = V('g-envio-dir');
+  const envioB2B = V('g-envio-b2b');
+  const envioDist = V('g-envio-dist');
+  const fijos = V('g-fijos');
+  return { comision, iva, inclIVA, laborRate, laborBolsa, margenDir, margenB2B, descT1, descT2, descT3, envioDir, envioB2B, envioDist, fijos };
+}
+
+function onEspTipo() {
+  const sel = $('esp-tipo').value;
+  if (sel !== 'custom') { $('esp-verde').value = sel; }
+  calcEsp();
+}
+
+// Price from cost and target margin, accounting for commission
+// precio_neto = costo / (1 - margen - comision)
+// If IVA included: precio_publico = precio_neto * (1 + iva)
+function precioDesdeMargen(costo, margen, g) {
+  const denom = 1 - margen - g.comision;
+  if (denom <= 0) return 0;
+  const neto = costo / denom;
+  return g.inclIVA ? neto * (1 + g.iva) : neto;
+}
+
+// Margin from price and cost
+// If IVA included: neto = precio / (1 + iva)
+// margen = (neto * (1 - comision) - costo) / neto
+function margenDesdePrecio(precio, costo, g) {
+  const neto = g.inclIVA ? precio / (1 + g.iva) : precio;
+  if (neto <= 0) return 0;
+  return (neto * (1 - g.comision) - costo) / neto;
+}
+
+function marginClass(m) {
+  return m >= 0.5 ? 'margin-green' : m >= 0.3 ? 'margin-yellow' : 'margin-red';
+}
+
+// ── Tabs & toggles ──
+const TAB_MAP = { especial: 0, tradicional: 1, coldbrew: 2, eventos: 3, resumen: 4 };
+function showSec(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  $('sec-' + id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const idx = TAB_MAP[id];
+  if (idx !== undefined) document.querySelectorAll('.tab')[idx].classList.add('active');
+  if (id === 'resumen') renderResumen();
+}
+function toggleEmp(id) { $('emp-' + id + '-detail').classList.toggle('open'); }
+function togglePanel(el) {
+  el.classList.toggle('open');
+  $('global-panel').classList.toggle('open');
+}
+function recalcAll() { calcEsp(); calcTrad(); calcCB(); calcEventos(); updateExplainer(); savePricesToLS(); }
+
+// Store manual price overrides: key = "tab-idx" → price
+let manualPrices = loadPricesFromLS();
+
+function savePricesToLS() {
+  try { localStorage.setItem('salentino-prices', JSON.stringify(manualPrices)); } catch(e) {}
+}
+function loadPricesFromLS() {
+  try { const d = localStorage.getItem('salentino-prices'); return d ? JSON.parse(d) : {}; } catch(e) { return {}; }
+}
+
+function onManualPrice(tab, idx, el) {
+  const raw = el.value.replace(/[^0-9]/g, '');
+  const val = parseInt(raw) || 0;
+  el.value = raw;
+  const key = tab + '-' + idx;
+  if (val > 0) { manualPrices[key] = val; }
+  else { delete manualPrices[key]; }
+  recalcAll();
+}
+function priceKeydown(e) { if (e.key === 'Enter') { e.target.blur(); } }
+
+// ── Especiales ──
+function calcEsp() {
+  const verde = V('esp-verde');
+  const inv = V('esp-inv');
+  const vida = V('esp-vida');
+  const elec = V('esp-elec');
+  const mant = V('esp-mant');
+  const vol = V('esp-vol');
+  const factor = V('esp-factor');
+
+  const dep = vida > 0 ? inv / (vida * 12) : 0;
+  const fijoMes = dep + elec + mant;
+  const tuesteKg = vol > 0 ? fijoMes / vol : 0;
+
+  $('esp-dep-val').textContent = F(dep);
+  $('esp-fijo-val').textContent = F(fijoMes);
+  $('esp-tueste-kg').textContent = F(tuesteKg);
+
+  const tostadoKg = factor > 0 ? (verde + tuesteKg) / factor : 0;
+  $('esp-tostado-kg').textContent = F(tostadoKg);
+  $('esp-tostado-g').textContent = Fd(tostadoKg / 1000, 1);
+
+  renderWaterfall('esp-waterfall', [
+    { label: 'Cafe verde (ajustado por rendimiento)', val: factor > 0 ? verde / factor : 0, color: 'var(--brown)' },
+    { label: 'Tueste propio (ajustado por rendimiento)', val: factor > 0 ? tuesteKg / factor : 0, color: 'var(--orange)' },
+  ], tostadoKg);
+
+  const pres = [
+    { name: '250g', peso: 0.25, emp: EMP_250 },
+    { name: '454g', peso: 0.454, emp: EMP_454 },
+    { name: '1 kg', peso: 1, emp: EMP_454 },
+    { name: '2.5 kg', peso: 2.5, emp: EMP_454 },
+  ];
+  renderPresWithPricing('esp-pres', 'esp', pres, tostadoKg, 'bolsa');
+  renderChannelTable('esp-channels', 'esp', pres, tostadoKg, 'bolsa');
+}
+
+// ── Tradicional ──
+function calcTrad() {
+  const perg = V('trad-perg');
+  const tueste = V('trad-tueste');
+  const factor = V('trad-factor');
+  const subtotal = perg + tueste;
+
+  $('trad-subtotal').textContent = F(subtotal);
+
+  const tostadoKg = factor > 0 ? subtotal / factor : 0;
+  $('trad-tostado-kg').textContent = F(tostadoKg);
+  $('trad-tostado-g').textContent = Fd(tostadoKg / 1000, 1);
+
+  $('cb-tostado').value = Math.round(tostadoKg);
+
+  renderWaterfall('trad-waterfall', [
+    { label: 'Pergamino (ajustado por rendimiento)', val: factor > 0 ? perg / factor : 0, color: 'var(--brown)' },
+    { label: 'Trilla + tueste externo (ajustado)', val: factor > 0 ? tueste / factor : 0, color: 'var(--orange)' },
+  ], tostadoKg);
+
+  const pres = [
+    { name: '250g', peso: 0.25, emp: EMP_250 },
+    { name: '454g', peso: 0.454, emp: EMP_454 },
+    { name: '1 kg', peso: 1, emp: EMP_454 },
+    { name: '2.5 kg', peso: 2.5, emp: EMP_454 },
+  ];
+  renderPresWithPricing('trad-pres', 'trad', pres, tostadoKg, 'bolsa');
+  renderChannelTable('trad-channels', 'trad', pres, tostadoKg, 'bolsa');
+  calcCB();
+}
+
+// ── Cold Brew ──
+function calcCB() {
+  const tostado = V('cb-tostado');
+  const loteKg = V('cb-lote');
+  const agua = V('cb-agua');
+  const botellas = V('cb-botellas');
+  const minLote = V('cb-min-lote');
+  const lotesMes = Math.max(1, V('cb-lotes-mes') || 4);
+  const fijoLote = V('cb-fijo-lote') || 0;
+  const overheadMes = V('cb-overhead-mes') || 0;
+  const g = G();
+
+  const loteCosto = loteKg * tostado;
+  const cafePorBot = botellas > 0 ? loteCosto / botellas : 0;
+  const laborPorBot = botellas > 0 ? (minLote / 60) * g.laborRate / botellas : 0;
+  const fijoBot = botellas > 0 ? fijoLote / botellas : 0;
+  const botsMes = botellas * lotesMes;
+  const overheadBot = botsMes > 0 ? overheadMes / botsMes : 0;
+  const totalFijoBot = fijoBot + overheadBot;
+
+  $('cb-lote-costo').textContent = F(loteCosto);
+  $('cb-cafe-bot').textContent = F(cafePorBot);
+
+  $('cb-bots-mes').textContent = botsMes.toLocaleString('es-CO');
+  $('cb-fijo-bot').textContent = F(fijoBot);
+  if ($('cb-overhead-bot')) $('cb-overhead-bot').textContent = F(overheadBot);
+  $('cb-total-bot').textContent = F(cafePorBot + totalFijoBot);
+
+  renderCBVolumeTable(cafePorBot, fijoLote, botellas, laborPorBot, overheadMes, lotesMes);
+
+  const cafeGalon = agua > 0 ? (3.8 / agua) * loteCosto : 0;
+  const laborGalon = agua > 0 ? (3.8 / agua) * (minLote / 60) * g.laborRate : 0;
+  const fijoGalon = agua > 0 ? (3.8 / agua) * fijoLote : 0;
+  const overheadGalon = botsMes > 0 ? overheadMes * (3.8 / (0.25 * botsMes)) : 0;
+
+  const pres = [
+    { name: 'Botella 250ml', cafe: cafePorBot, emp: EMP_CB, labor: laborPorBot, fijo: totalFijoBot,
+      detailFn: (t) => Fd(t / 250, 2) + '/ml' },
+    { name: '4-Pack', cafe: cafePorBot * 4, emp: EMP_4P, labor: laborPorBot * 4, fijo: totalFijoBot * 4,
+      detailFn: (t) => F(t / 4) + '/bot equiv.' },
+    { name: 'Galon 3.8L', cafe: cafeGalon, emp: EMP_GAL, labor: laborGalon, fijo: fijoGalon + overheadGalon,
+      detailFn: (t) => Fd(t / 3800, 2) + '/ml' },
+  ];
+
+  renderCBPresWithPricing('cb-pres', pres);
+  renderCBChannelTable('cb-channels', pres);
+}
+
+function renderCBVolumeTable(cafePorBot, fijoLote, botellas, laborPorBot, overheadMes, currentLotes) {
+  const tiers = [1, 2, 4, 8, 12, 16];
+  if (!tiers.includes(currentLotes)) tiers.push(currentLotes);
+  tiers.sort((a, b) => a - b);
+
+  const rows = tiers.map(l => {
+    const bots = botellas * l;
+    const fijoPorBot = botellas > 0 ? fijoLote / botellas : 0;
+    const overheadPorBot = bots > 0 ? overheadMes / bots : 0;
+    const totalBot = cafePorBot + fijoPorBot + overheadPorBot + laborPorBot + EMP_CB;
+    const isCurrent = l === currentLotes;
+    return `<tr${isCurrent ? ' style="background:var(--orange-subtle);font-weight:700"' : ''}>
+      <td>${l}</td>
+      <td>${bots.toLocaleString('es-CO')}</td>
+      <td>${F(fijoPorBot)}</td>
+      <td>${F(overheadPorBot)}</td>
+      <td>${F(totalBot)}</td>
+    </tr>`;
+  }).join('');
+
+  $('cb-volume-table').innerHTML = `
+    <table class="channel-table" style="font-size:12px">
+      <thead><tr><th>Lotes/mes</th><th>Botellas</th><th>Fijo/bot</th><th>Overhead/bot</th><th>Costo total/bot</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="text-sm mt-8">Fijo/bot = constante por lote // Overhead/bot baja con mas volumen</p>`;
+}
+
+// ── Shared renderers ──
+function renderWaterfall(id, items, total) {
+  $(id).innerHTML = items.map(it => {
+    const pct = total > 0 ? (it.val / total) * 100 : 0;
+    return `<div class="wf-bar-wrap">
+      <div class="wf-label"><span>${it.label}</span><span>${F(it.val)}/kg</span></div>
+      <div class="wf-bar"><div class="wf-fill" style="width:${pct}%;background:${it.color}"></div></div>
+    </div>`;
+  }).join('') + `<div class="wf-bar-wrap">
+    <div class="wf-label"><span><strong>= Costo tostado total</strong></span><span><strong>${F(total)}/kg</strong></span></div>
+    <div class="wf-bar"><div class="wf-fill" style="width:100%;background:var(--black)"></div></div>
+  </div>`;
+}
+
+// Break-even HTML helper
+function peHTML(utilidad, fijos) {
+  if (utilidad <= 0) {
+    return `<div class="pe-row pe-danger">no viable a este precio<span class="pe-val">utilidad negativa</span></div>`;
+  }
+  const pe = Math.ceil(fijos / utilidad);
+  const cls = pe <= 200 ? 'pe-viable' : pe <= 500 ? 'pe-warning' : 'pe-danger';
+  return `<div class="pe-row ${cls}">punto de equilibrio<span class="pe-val">${pe.toLocaleString('es-CO')} uds/mes</span></div>`;
+}
+
+function renderPresWithPricing(containerId, tab, pres, tostadoKg, type) {
+  const g = G();
+  $(containerId).innerHTML = pres.map((p, i) => {
+    const cafe = tostadoKg * p.peso;
+    const labor = g.laborBolsa;
+    const costoBase = cafe + p.emp + labor;
+    const porG = costoBase / (p.peso * 1000);
+
+    const key = tab + '-' + i;
+    const manual = manualPrices[key];
+
+    let precioPub, margen;
+    if (manual) {
+      precioPub = manual;
+      margen = margenDesdePrecio(precioPub, costoBase, g);
+    } else {
+      precioPub = precioDesdeMargen(costoBase, g.margenDir, g);
+      margen = g.margenDir;
+    }
+
+    const neto = g.inclIVA ? precioPub / (1 + g.iva) : precioPub;
+    const comisionVal = neto * g.comision;
+    const utilidad = neto - costoBase - comisionVal;
+    const mc = marginClass(margen);
+
+    return `
+      <div class="pres-card">
+        <div class="pres-name">${p.name}</div>
+        <div class="pres-cost">${F(costoBase)}</div>
+        <div class="pres-sub">costo variable</div>
+        <div class="pres-detail">${Fd(porG, 1)}/g</div>
+        <div class="pres-breakdown">
+          <div class="bk-row"><span>Cafe (${p.peso} kg)</span><span>${F(cafe)}</span></div>
+          <div class="bk-row"><span>Empaque</span><span>${F(p.emp)}</span></div>
+          <div class="bk-row"><span>Mano de obra</span><span>${F(labor)}</span></div>
+          <div class="bk-row total"><span>Costo base</span><span>${F(costoBase)}</span></div>
+        </div>
+        <div class="pres-price-section">
+          <div class="price-input-label">escribe tu precio // o usa el sugerido</div>
+          <div class="price-input-wrap">
+            <input class="pres-precio-input" type="text" inputmode="numeric" value="${manual || ''}" placeholder="${Math.round(precioPub)}" onkeydown="priceKeydown(event)" onchange="onManualPrice('${tab}',${i},this)">
+          </div>
+          <div class="price-suggested">${manual ? 'sugerido al '+Fp(g.margenDir)+': '+F(precioDesdeMargen(costoBase, g.margenDir, g)) : 'precio sugerido al margen objetivo'}</div>
+          <div style="text-align:center;margin:8px 0 4px">
+            <span class="margin-badge ${mc}">margen ${Fp(margen)}</span>
+          </div>
+          <div class="pres-price-row"><span class="pres-price-label">Ingreso neto${g.inclIVA?' (sin IVA)':''}</span><span class="pres-price-val">${F(neto)}</span></div>
+          <div class="pres-price-row"><span class="pres-price-label">- Costo base</span><span class="pres-price-val">${F(costoBase)}</span></div>
+          <div class="pres-price-row"><span class="pres-price-label">- Comision (${(g.comision*100).toFixed(1)}%)</span><span class="pres-price-val">${F(comisionVal)}</span></div>
+          <div class="pres-price-row" style="border-top:1px solid var(--dark-cream);margin-top:4px;padding-top:6px"><span class="pres-price-label" style="font-weight:700">= Utilidad por unidad</span><span class="pres-price-val" style="color:${utilidad >= 0 ? 'var(--orange)' : 'var(--red)'}">${F(utilidad)}</span></div>
+          ${peHTML(utilidad, g.fijos)}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderCBPresWithPricing(containerId, pres) {
+  const g = G();
+  $(containerId).innerHTML = pres.map((p, i) => {
+    const fijo = p.fijo || 0;
+    const costoBase = p.cafe + p.emp + p.labor + fijo;
+    const detail = p.detailFn(costoBase);
+
+    const key = 'cb-' + i;
+    const manual = manualPrices[key];
+
+    let precioPub, margen;
+    if (manual) {
+      precioPub = manual;
+      margen = margenDesdePrecio(precioPub, costoBase, g);
+    } else {
+      precioPub = precioDesdeMargen(costoBase, g.margenDir, g);
+      margen = g.margenDir;
+    }
+
+    const neto = g.inclIVA ? precioPub / (1 + g.iva) : precioPub;
+    const comisionVal = neto * g.comision;
+    const utilidad = neto - costoBase - comisionVal;
+    const mc = marginClass(margen);
+
+    return `
+      <div class="pres-card">
+        <div class="pres-name">${p.name}</div>
+        <div class="pres-cost">${F(costoBase)}</div>
+        <div class="pres-sub">costo total (variable + fijo lote)</div>
+        <div class="pres-detail">${detail}</div>
+        <div class="pres-breakdown">
+          <div class="bk-row"><span>Cafe</span><span>${F(p.cafe)}</span></div>
+          <div class="bk-row"><span>Empaque / materiales</span><span>${F(p.emp)}</span></div>
+          <div class="bk-row"><span>Mano de obra</span><span>${F(p.labor)}</span></div>
+          <div class="bk-row"><span>Fijo lote (gas, agua, setup)</span><span>${F(fijo)}</span></div>
+          <div class="bk-row total"><span>Costo base</span><span>${F(costoBase)}</span></div>
+        </div>
+        <div class="pres-price-section">
+          <div class="price-input-label">escribe tu precio // o usa el sugerido</div>
+          <div class="price-input-wrap">
+            <input class="pres-precio-input" type="text" inputmode="numeric" value="${manual || ''}" placeholder="${Math.round(precioPub)}" onkeydown="priceKeydown(event)" onchange="onManualPrice('cb',${i},this)">
+          </div>
+          <div class="price-suggested">${manual ? 'sugerido al '+Fp(g.margenDir)+': '+F(precioDesdeMargen(costoBase, g.margenDir, g)) : 'precio sugerido al margen objetivo'}</div>
+          <div style="text-align:center;margin:8px 0 4px">
+            <span class="margin-badge ${mc}">margen ${Fp(margen)}</span>
+          </div>
+          <div class="pres-price-row"><span class="pres-price-label">Ingreso neto${g.inclIVA?' (sin IVA)':''}</span><span class="pres-price-val">${F(neto)}</span></div>
+          <div class="pres-price-row"><span class="pres-price-label">- Costo base</span><span class="pres-price-val">${F(costoBase)}</span></div>
+          <div class="pres-price-row"><span class="pres-price-label">- Comision (${(g.comision*100).toFixed(1)}%)</span><span class="pres-price-val">${F(comisionVal)}</span></div>
+          <div class="pres-price-row" style="border-top:1px solid var(--dark-cream);margin-top:4px;padding-top:6px"><span class="pres-price-label" style="font-weight:700">= Utilidad por unidad</span><span class="pres-price-val" style="color:${utilidad >= 0 ? 'var(--orange)' : 'var(--red)'}">${F(utilidad)}</span></div>
+          ${peHTML(utilidad, g.fijos)}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Channel comparison tables ──
+function calcUtil(precio, costoBase, envio, g) {
+  const neto = g.inclIVA ? precio / (1 + g.iva) : precio;
+  return neto - costoBase - envio - neto * g.comision;
+}
+
+function renderChannelTable(containerId, tab, pres, tostadoKg, type) {
+  const g = G();
+
+  let rows = pres.map((p, i) => {
+    const cafe = tostadoKg * p.peso;
+    const labor = g.laborBolsa;
+    const costoBase = cafe + p.emp + labor;
+
+    const key = tab + '-' + i;
+    const manual = manualPrices[key];
+    const precioDir = manual || precioDesdeMargen(costoBase + g.envioDir, g.margenDir, g);
+    const margenDir = margenDesdePrecio(precioDir, costoBase + g.envioDir, g);
+
+    const precioB2B = precioDesdeMargen(costoBase + g.envioB2B, g.margenB2B, g);
+    const margenB2B = margenDesdePrecio(precioB2B, costoBase + g.envioB2B, g);
+
+    const pT1 = precioDir * (1 - g.descT1); const mT1 = margenDesdePrecio(pT1, costoBase + g.envioDist, g);
+    const pT2 = precioDir * (1 - g.descT2); const mT2 = margenDesdePrecio(pT2, costoBase + g.envioDist, g);
+    const pT3 = precioDir * (1 - g.descT3); const mT3 = margenDesdePrecio(pT3, costoBase + g.envioDist, g);
+
+    const utilDir = calcUtil(precioDir, costoBase, g.envioDir, g);
+    const peDir = utilDir > 0 ? Math.ceil(g.fijos / utilDir) : -1;
+    const peCls = peDir < 0 ? 'pe-danger' : peDir <= 200 ? 'pe-viable' : peDir <= 500 ? 'pe-warning' : 'pe-danger';
+
+    return `<tr>
+      <td style="font-weight:700">${p.name}</td>
+      <td>${F(costoBase)}</td>
+      <td>${F(precioDir)}</td>
+      <td><span class="margin-badge ${marginClass(margenDir)}">${Fp(margenDir)}</span></td>
+      <td>${F(precioB2B)}</td>
+      <td><span class="margin-badge ${marginClass(margenB2B)}">${Fp(margenB2B)}</span></td>
+      <td><span class="margin-badge ${marginClass(mT1)}">${Fp(mT1)}</span></td>
+      <td><span class="margin-badge ${marginClass(mT2)}">${Fp(mT2)}</span></td>
+      <td><span class="margin-badge ${marginClass(mT3)}">${Fp(mT3)}</span></td>
+      <td><span class="margin-badge ${peCls}">${peDir < 0 ? 'n/a' : peDir.toLocaleString('es-CO')}</span></td>
+    </tr>`;
+  }).join('');
+
+  $(containerId).innerHTML = `
+    <table class="channel-table">
+      <thead><tr>
+        <th>Producto</th><th>Costo</th>
+        <th>Directo</th><th>Margen</th>
+        <th>B2B</th><th>Margen</th>
+        <th>T1 (${(g.descT1*100).toFixed(0)}%)</th>
+        <th>T2 (${(g.descT2*100).toFixed(0)}%)</th>
+        <th>T3 (${(g.descT3*100).toFixed(0)}%)</th>
+        <th>PE uds</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="text-sm mt-8">T1/T2/T3 = margen del distribuidor segun tier de descuento${g.inclIVA ? ' // Precios incluyen IVA '+((g.iva*100).toFixed(0))+'%' : ''}${g.envioDir > 0 ? ' // Envio incluido en costo' : ''}</p>`;
+}
+
+function renderCBChannelTable(containerId, pres) {
+  const g = G();
+
+  let rows = pres.map((p, i) => {
+    const costoBase = p.cafe + p.emp + p.labor + (p.fijo || 0);
+
+    const key = 'cb-' + i;
+    const manual = manualPrices[key];
+    const precioDir = manual || precioDesdeMargen(costoBase + g.envioDir, g.margenDir, g);
+    const margenDir = margenDesdePrecio(precioDir, costoBase + g.envioDir, g);
+
+    const precioB2B = precioDesdeMargen(costoBase + g.envioB2B, g.margenB2B, g);
+    const margenB2B = margenDesdePrecio(precioB2B, costoBase + g.envioB2B, g);
+
+    const pT1 = precioDir * (1 - g.descT1); const mT1 = margenDesdePrecio(pT1, costoBase + g.envioDist, g);
+    const pT2 = precioDir * (1 - g.descT2); const mT2 = margenDesdePrecio(pT2, costoBase + g.envioDist, g);
+    const pT3 = precioDir * (1 - g.descT3); const mT3 = margenDesdePrecio(pT3, costoBase + g.envioDist, g);
+
+    const utilDir = calcUtil(precioDir, costoBase, g.envioDir, g);
+    const peDir = utilDir > 0 ? Math.ceil(g.fijos / utilDir) : -1;
+    const peCls = peDir < 0 ? 'pe-danger' : peDir <= 200 ? 'pe-viable' : peDir <= 500 ? 'pe-warning' : 'pe-danger';
+
+    return `<tr>
+      <td style="font-weight:700">${p.name}</td>
+      <td>${F(costoBase)}</td>
+      <td>${F(precioDir)}</td>
+      <td><span class="margin-badge ${marginClass(margenDir)}">${Fp(margenDir)}</span></td>
+      <td>${F(precioB2B)}</td>
+      <td><span class="margin-badge ${marginClass(margenB2B)}">${Fp(margenB2B)}</span></td>
+      <td><span class="margin-badge ${marginClass(mT1)}">${Fp(mT1)}</span></td>
+      <td><span class="margin-badge ${marginClass(mT2)}">${Fp(mT2)}</span></td>
+      <td><span class="margin-badge ${marginClass(mT3)}">${Fp(mT3)}</span></td>
+      <td><span class="margin-badge ${peCls}">${peDir < 0 ? 'n/a' : peDir.toLocaleString('es-CO')}</span></td>
+    </tr>`;
+  }).join('');
+
+  $(containerId).innerHTML = `
+    <table class="channel-table">
+      <thead><tr>
+        <th>Producto</th><th>Costo</th>
+        <th>Directo</th><th>Margen</th>
+        <th>B2B</th><th>Margen</th>
+        <th>T1 (${(g.descT1*100).toFixed(0)}%)</th>
+        <th>T2 (${(g.descT2*100).toFixed(0)}%)</th>
+        <th>T3 (${(g.descT3*100).toFixed(0)}%)</th>
+        <th>PE uds</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="text-sm mt-8">T1/T2/T3 = margen del distribuidor segun tier${g.inclIVA ? ' // Precios incluyen IVA '+((g.iva*100).toFixed(0))+'%' : ''}</p>`;
+}
+
+// ── Eventos ──
+function calcEventos() {
+  const g = G();
+
+  // Sync costs from other tabs
+  const tradTostadoKg = V('trad-factor') > 0 ? (V('trad-perg') + V('trad-tueste')) / V('trad-factor') : 0;
+  $('ev-trad-costo').value = Math.round(tradTostadoKg);
+
+  // CB galon cost (read from CB calc)
+  const cbTostado = V('cb-tostado');
+  const cbLoteKg = V('cb-lote');
+  const cbAgua = V('cb-agua');
+  const cbBots = V('cb-botellas');
+  const cbMinLote = V('cb-min-lote');
+  const cbLotesMes = Math.max(1, V('cb-lotes-mes') || 4);
+  const cbFijoLote = V('cb-fijo-lote') || 0;
+  const cbOverhead = V('cb-overhead-mes') || 0;
+  const loteCosto = cbLoteKg * cbTostado;
+  const botsMes = cbBots * cbLotesMes;
+  const cafeGal = cbAgua > 0 ? (3.8 / cbAgua) * loteCosto : 0;
+  const laborGal = cbAgua > 0 ? (3.8 / cbAgua) * (cbMinLote/60) * g.laborRate : 0;
+  const fijoGal = cbAgua > 0 ? (3.8 / cbAgua) * cbFijoLote : 0;
+  const ohGal = botsMes > 0 ? cbOverhead * (3.8 / (0.25 * botsMes)) : 0;
+  const galonCosto = cafeGal + EMP_GAL + laborGal + fijoGal + ohGal;
+  $('ev-galon-costo').value = Math.round(galonCosto);
+
+  // CB beverages
+  const cbMl = V('ev-cb-ml');
+  const vasosFrio = cbMl > 0 ? Math.floor(3800 / cbMl) : 0;
+  $('ev-vasos-galon').textContent = vasosFrio;
+  const cbPorVaso = vasosFrio > 0 ? galonCosto / vasosFrio : 0;
+  const vasoMat = V('ev-vaso');
+  const hielo = V('ev-hielo');
+  const lecheLitro = V('ev-leche-costo');
+  const tonicaLitro = V('ev-tonica-costo');
+  const vasoTotal = 355; // 12oz in ml
+  const mixerMl = Math.max(0, vasoTotal - cbMl); // ml of mixer
+
+  const costoLeche = (mixerMl / 1000) * lecheLitro;
+  const costoTonica = (mixerMl / 1000) * tonicaLitro;
+
+  const drinks = [
+    { name: 'CB Solo', cb: cbPorVaso, mixer: 0, mixerName: 'solo cold brew' },
+    { name: 'CB + Leche', cb: cbPorVaso, mixer: costoLeche, mixerName: mixerMl + 'ml leche' },
+    { name: 'CB + Tonica', cb: cbPorVaso, mixer: costoTonica, mixerName: mixerMl + 'ml tonica' },
+  ];
+
+  $('ev-cb-pres').innerHTML = drinks.map(d => {
+    const costo = d.cb + d.mixer + vasoMat + hielo;
+    const precioSug = precioDesdeMargen(costo, g.margenDir, g);
+    return `<div class="pres-card">
+      <div class="pres-name">${d.name}</div>
+      <div class="pres-cost">${F(costo)}</div>
+      <div class="pres-sub">costo por vaso</div>
+      <div class="pres-detail">${d.mixerName}</div>
+      <div class="pres-breakdown">
+        <div class="bk-row"><span>Cold Brew (${cbMl}ml)</span><span>${F(d.cb)}</span></div>
+        ${d.mixer > 0 ? `<div class="bk-row"><span>Mixer</span><span>${F(d.mixer)}</span></div>` : ''}
+        <div class="bk-row"><span>Vaso 12oz</span><span>${F(vasoMat)}</span></div>
+        <div class="bk-row"><span>Hielo</span><span>${F(hielo)}</span></div>
+        <div class="bk-row total"><span>Costo total</span><span>${F(costo)}</span></div>
+      </div>
+      <div class="pres-price-section">
+        <div class="pres-price-row"><span class="pres-price-label">Precio sugerido (${Fp(g.margenDir)})</span><span class="pres-price-val" style="color:var(--orange)">${F(precioSug)}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Hot coffee Aeropress
+  const gramos = V('ev-gramos');
+  const aguaMl = V('ev-agua-ml');
+  const vasoCal = V('ev-vaso-cal');
+  const filtro = V('ev-filtro');
+  const extras = V('ev-extras');
+  const cafeCosto = (gramos / 1000) * tradTostadoKg;
+  const tazasPorKg = gramos > 0 ? Math.floor(1000 / gramos) : 0;
+  const costoHot = cafeCosto + vasoCal + filtro + extras;
+  const precioHot = precioDesdeMargen(costoHot, g.margenDir, g);
+
+  $('ev-hot-pres').innerHTML = `
+    <div class="pres-card">
+      <div class="pres-name">Aeropress caliente</div>
+      <div class="pres-cost">${F(costoHot)}</div>
+      <div class="pres-sub">costo por taza</div>
+      <div class="pres-detail">${gramos}g cafe // ${aguaMl}ml agua // ${tazasPorKg} tazas/kg</div>
+      <div class="pres-breakdown">
+        <div class="bk-row"><span>Cafe (${gramos}g)</span><span>${F(cafeCosto)}</span></div>
+        <div class="bk-row"><span>Vaso + tapa</span><span>${F(vasoCal)}</span></div>
+        <div class="bk-row"><span>Filtro</span><span>${F(filtro)}</span></div>
+        <div class="bk-row"><span>Azucar/extras</span><span>${F(extras)}</span></div>
+        <div class="bk-row total"><span>Costo total</span><span>${F(costoHot)}</span></div>
+      </div>
+      <div class="pres-price-section">
+        <div class="pres-price-row"><span class="pres-price-label">Precio sugerido (${Fp(g.margenDir)})</span><span class="pres-price-val" style="color:var(--orange)">${F(precioHot)}</span></div>
+        <div class="pres-price-row"><span class="pres-price-label">Tazas por kg de cafe</span><span class="pres-price-val">${tazasPorKg}</span></div>
+      </div>
+    </div>`;
+
+  // Event summary
+  const qtyFrios = V('ev-qty-frios');
+  const qtyCalientes = V('ev-qty-calientes');
+  const precioVaso = V('ev-precio-vaso');
+  const logistica = V('ev-logistica');
+
+  // Use avg CB cost (with leche as default mix)
+  const avgCBCosto = cbPorVaso + costoLeche + vasoMat + hielo;
+  const totalCostoFrios = qtyFrios * avgCBCosto;
+  const totalCostoCalientes = qtyCalientes * costoHot;
+  const totalCostoVar = totalCostoFrios + totalCostoCalientes;
+  const totalVasos = qtyFrios + qtyCalientes;
+  const totalIngreso = totalVasos * precioVaso;
+  const totalNeto = g.inclIVA ? totalIngreso / (1 + g.iva) : totalIngreso;
+  const comision = totalNeto * g.comision;
+  const utilEvento = totalNeto - totalCostoVar - comision - logistica;
+
+  $('ev-resumen').innerHTML = `
+    <div class="pres-breakdown" style="font-size:13px">
+      <div class="bk-row"><span>Ingreso (${totalVasos} vasos x ${F(precioVaso)})</span><span>${F(totalIngreso)}</span></div>
+      ${g.inclIVA ? `<div class="bk-row"><span>Ingreso neto (sin IVA ${(g.iva*100).toFixed(0)}%)</span><span>${F(totalNeto)}</span></div>` : ''}
+      <div class="bk-row"><span>- Costo frios (${qtyFrios} x ${F(avgCBCosto)} avg)</span><span>${F(totalCostoFrios)}</span></div>
+      <div class="bk-row"><span>- Costo calientes (${qtyCalientes} x ${F(costoHot)})</span><span>${F(totalCostoCalientes)}</span></div>
+      <div class="bk-row"><span>- Comision (${(g.comision*100).toFixed(1)}%)</span><span>${F(comision)}</span></div>
+      <div class="bk-row"><span>- Logistica evento</span><span>${F(logistica)}</span></div>
+      <div class="bk-row total"><span>= Utilidad del evento</span><span style="color:${utilEvento>=0?'var(--green)':'var(--red)'};font-size:18px">${F(utilEvento)}</span></div>
+    </div>
+    <div class="result-row ${utilEvento>=0?'highlight':''}" style="${utilEvento<0?'background:var(--red-bg)':''}; margin-top:12px">
+      <div class="result-label"><strong>Margen del evento</strong></div>
+      <div class="result-value" style="color:${utilEvento>=0?'var(--green)':'var(--red)'}">${totalNeto > 0 ? Fp(utilEvento / totalNeto) : '0%'}</div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Galones de CB necesarios</div>
+      <div class="result-value num">${vasosFrio > 0 ? (qtyFrios / vasosFrio).toFixed(1) : '0'}</div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Kg de cafe trad necesarios (Aeropress)</div>
+      <div class="result-value num">${((qtyCalientes * gramos) / 1000).toFixed(2)} kg</div>
+    </div>`;
+}
+
+// ── Resumen / Break-even ──
+function getAllProducts() {
+  const g = G();
+  const products = [];
+
+  // Especiales
+  const espVerde = V('esp-verde');
+  const espTueste = V('esp-vol') > 0 ? (V('esp-inv')/(V('esp-vida')*12) + V('esp-elec') + V('esp-mant')) / V('esp-vol') : 0;
+  const espFactor = V('esp-factor');
+  const espTostado = espFactor > 0 ? (espVerde + espTueste) / espFactor : 0;
+  const espPres = [{name:'Esp 250g',peso:0.25,emp:EMP_250},{name:'Esp 454g',peso:0.454,emp:EMP_454},{name:'Esp 1kg',peso:1,emp:EMP_454},{name:'Esp 2.5kg',peso:2.5,emp:EMP_454}];
+  espPres.forEach((p,i) => {
+    const cafe = espTostado * p.peso;
+    const costoBase = cafe + p.emp + g.laborBolsa;
+    const key = 'esp-'+i;
+    const manual = manualPrices[key];
+    const precio = manual || precioDesdeMargen(costoBase + g.envioDir, g.margenDir, g);
+    const margen = margenDesdePrecio(precio, costoBase + g.envioDir, g);
+    const utilidad = calcUtil(precio, costoBase, g.envioDir, g);
+    products.push({ name: p.name, line: 'Especiales', costoBase, precio, margen, utilidad, key, defaultQty: i===0?25:i===1?10:5 });
+  });
+
+  // Tradicional
+  const tradTostado = V('trad-factor') > 0 ? (V('trad-perg') + V('trad-tueste')) / V('trad-factor') : 0;
+  const tradPres = [{name:'Trad 250g',peso:0.25,emp:EMP_250},{name:'Trad 454g',peso:0.454,emp:EMP_454},{name:'Trad 1kg',peso:1,emp:EMP_454},{name:'Trad 2.5kg',peso:2.5,emp:EMP_454}];
+  tradPres.forEach((p,i) => {
+    const cafe = tradTostado * p.peso;
+    const costoBase = cafe + p.emp + g.laborBolsa;
+    const key = 'trad-'+i;
+    const manual = manualPrices[key];
+    const precio = manual || precioDesdeMargen(costoBase + g.envioDir, g.margenDir, g);
+    const margen = margenDesdePrecio(precio, costoBase + g.envioDir, g);
+    const utilidad = calcUtil(precio, costoBase, g.envioDir, g);
+    products.push({ name: p.name, line: 'Tradicional', costoBase, precio, margen, utilidad, key, defaultQty: i===0?80:i===1?30:i===2?10:5 });
+  });
+
+  // Cold Brew
+  const cbTostado = V('cb-tostado');
+  const cbLoteKg = V('cb-lote');
+  const cbAgua = V('cb-agua');
+  const cbBots = V('cb-botellas');
+  const cbMinLote = V('cb-min-lote');
+  const cbLotesMes = Math.max(1, V('cb-lotes-mes') || 4);
+  const cbFijoLote = V('cb-fijo-lote') || 0;
+  const cbOverhead = V('cb-overhead-mes') || 0;
+  const loteCosto = cbLoteKg * cbTostado;
+  const cafePorBot = cbBots > 0 ? loteCosto / cbBots : 0;
+  const laborPorBot = cbBots > 0 ? (cbMinLote / 60) * g.laborRate / cbBots : 0;
+  const fijoBot = cbBots > 0 ? cbFijoLote / cbBots : 0;
+  const botsMes = cbBots * cbLotesMes;
+  const overheadBot = botsMes > 0 ? cbOverhead / botsMes : 0;
+  const totalFijoBot = fijoBot + overheadBot;
+
+  const cafeGal = cbAgua > 0 ? (3.8/cbAgua) * loteCosto : 0;
+  const laborGal = cbAgua > 0 ? (3.8/cbAgua) * (cbMinLote/60) * g.laborRate : 0;
+  const fijoGal = cbAgua > 0 ? (3.8/cbAgua) * cbFijoLote : 0;
+  const ohGal = botsMes > 0 ? cbOverhead * (3.8/(0.25*botsMes)) : 0;
+
+  const cbItems = [
+    { name:'CB Botella', cafe:cafePorBot, emp:EMP_CB, labor:laborPorBot, fijo:totalFijoBot, dq:80 },
+    { name:'CB 4-Pack', cafe:cafePorBot*4, emp:EMP_4P, labor:laborPorBot*4, fijo:totalFijoBot*4, dq:10 },
+    { name:'CB Galon', cafe:cafeGal, emp:EMP_GAL, labor:laborGal, fijo:fijoGal+ohGal, dq:8 },
+  ];
+  cbItems.forEach((p,i) => {
+    const costoBase = p.cafe + p.emp + p.labor + p.fijo;
+    const key = 'cb-'+i;
+    const manual = manualPrices[key];
+    const precio = manual || precioDesdeMargen(costoBase + g.envioDir, g.margenDir, g);
+    const margen = margenDesdePrecio(precio, costoBase + g.envioDir, g);
+    const utilidad = calcUtil(precio, costoBase, g.envioDir, g);
+    products.push({ name: p.name, line: 'Cold Brew', costoBase, precio, margen, utilidad, key, defaultQty: p.dq });
+  });
+
+  return products;
+}
+
+function renderResumen() {
+  const g = G();
+  const products = getAllProducts();
+
+  // 1. Side by side
+  let sbs = products.map(p => `<tr>
+    <td style="font-size:10px;color:var(--brown);opacity:.6">${p.line}</td>
+    <td style="font-weight:700">${p.name}</td>
+    <td>${F(p.costoBase)}</td>
+    <td>${F(p.precio)}</td>
+    <td><span class="margin-badge ${marginClass(p.margen)}">${Fp(p.margen)}</span></td>
+    <td style="color:${p.utilidad>=0?'var(--orange)':'var(--red)'}; font-weight:700">${F(p.utilidad)}</td>
+  </tr>`).join('');
+  $('res-sidebyside').innerHTML = `<table class="channel-table"><thead><tr><th>Linea</th><th>Producto</th><th>Costo</th><th>Precio</th><th>Margen</th><th>Utilidad/ud</th></tr></thead><tbody>${sbs}</tbody></table>`;
+
+  // 2. PE per product
+  let peRows = products.map(p => {
+    const pe = p.utilidad > 0 ? Math.ceil(g.fijos / p.utilidad) : -1;
+    const cls = pe < 0 ? 'pe-danger' : pe <= 200 ? 'pe-viable' : pe <= 500 ? 'pe-warning' : 'pe-danger';
+    return `<tr>
+      <td style="font-weight:700">${p.name}</td>
+      <td>${F(p.costoBase)}</td>
+      <td>${F(p.precio)}</td>
+      <td style="color:${p.utilidad>=0?'var(--orange)':'var(--red)'};font-weight:700">${F(p.utilidad)}</td>
+      <td><span class="margin-badge ${cls}">${pe < 0 ? 'no viable' : pe.toLocaleString('es-CO') + ' uds/mes'}</span></td>
+    </tr>`;
+  }).join('');
+  $('res-pe-product').innerHTML = `<table class="channel-table"><thead><tr><th>Producto</th><th>Costo</th><th>Precio</th><th>Utilidad/ud</th><th>PE (solo este producto)</th></tr></thead><tbody>${peRows}</tbody></table>`;
+
+  // 3. Mix inputs
+  let mixHTML = '<div class="param-grid">';
+  products.forEach((p, i) => {
+    const savedQty = mixQtys[p.key] !== undefined ? mixQtys[p.key] : p.defaultQty;
+    mixHTML += `<div class="input-row"><div class="input-label"><strong>${p.name}</strong></div><div class="input-field"><input type="number" id="mix-${p.key}" value="${savedQty}" min="0" oninput="onMixChange('${p.key}',this)"></div><div class="input-unit">uds/mes</div></div>`;
+  });
+  mixHTML += '</div>';
+  $('res-mix-inputs').innerHTML = mixHTML;
+
+  // Calculate combined PE & P&L
+  let totalUds = 0, totalIngreso = 0, totalCosto = 0, totalUtil = 0;
+  products.forEach(p => {
+    const qty = mixQtys[p.key] !== undefined ? mixQtys[p.key] : p.defaultQty;
+    totalUds += qty;
+    totalIngreso += qty * (g.inclIVA ? p.precio / (1 + g.iva) : p.precio);
+    totalCosto += qty * (p.costoBase + g.envioDir);
+    totalUtil += qty * p.utilidad;
+  });
+  const avgUtil = totalUds > 0 ? totalUtil / totalUds : 0;
+  const peCombined = avgUtil > 0 ? Math.ceil(g.fijos / avgUtil) : -1;
+  const peCls = peCombined < 0 ? 'pe-danger' : peCombined <= totalUds ? 'pe-viable' : peCombined <= totalUds * 1.5 ? 'pe-warning' : 'pe-danger';
+  const comisionTotal = totalIngreso * g.comision;
+  const utilBruta = totalIngreso - totalCosto - comisionTotal;
+  const utilNeta = utilBruta - g.fijos;
+  const viable = utilNeta >= 0;
+
+  $('res-mix-result').innerHTML = `
+    <div class="result-row ${peCombined > 0 && peCombined <= totalUds ? 'highlight' : 'subtle'}">
+      <div class="result-label"><strong>PE combinado (promedio ponderado)</strong></div>
+      <div class="result-value" style="color:${peCombined > 0 && peCombined <= totalUds ? 'var(--green)' : 'var(--red)'}">${peCombined < 0 ? 'no viable' : peCombined.toLocaleString('es-CO') + ' uds/mes'}</div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Utilidad promedio ponderada / unidad</div>
+      <div class="result-value num">${F(avgUtil)}</div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Unidades en tu mix actual</div>
+      <div class="result-value num">${totalUds.toLocaleString('es-CO')}</div>
+    </div>
+    <div class="result-row ${viable ? 'highlight' : ''}" style="${!viable ? 'background:var(--red-bg)' : ''}">
+      <div class="result-label"><strong>${viable ? 'Tu mix actual CUBRE los costos fijos' : 'Tu mix actual NO cubre los costos fijos'}</strong></div>
+      <div class="result-value" style="color:${viable ? 'var(--green)' : 'var(--red)'}">${viable ? 'viable' : 'faltan ' + (peCombined > 0 ? (peCombined - totalUds).toLocaleString('es-CO') : '?') + ' uds'}</div>
+    </div>`;
+
+  // 4. P&L
+  $('res-pnl').innerHTML = `
+    <div class="pres-breakdown" style="font-size:13px">
+      <div class="bk-row"><span>Ingreso neto (${totalUds} uds)</span><span>${F(totalIngreso)}</span></div>
+      <div class="bk-row"><span>- Costo variable</span><span>${F(totalCosto)}</span></div>
+      <div class="bk-row"><span>- Comision (${(g.comision*100).toFixed(1)}%)</span><span>${F(comisionTotal)}</span></div>
+      <div class="bk-row total"><span>= Utilidad bruta</span><span style="color:${utilBruta>=0?'var(--orange)':'var(--red)'}">${F(utilBruta)}</span></div>
+      <div class="bk-row"><span>- Costos fijos mensuales</span><span>${F(g.fijos)}</span></div>
+      <div class="bk-row total"><span>= Utilidad neta mensual</span><span style="color:${utilNeta>=0?'var(--green)':'var(--red)'}; font-size:18px">${F(utilNeta)}</span></div>
+    </div>`;
+
+  // 5. Price card
+  const lines = ['Especiales', 'Tradicional', 'Cold Brew'];
+  let cardHTML = '';
+  lines.forEach(line => {
+    const lp = products.filter(p => p.line === line);
+    cardHTML += `<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:6px">${line}</div>`;
+    lp.forEach(p => {
+      cardHTML += `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.08)"><span style="color:var(--cream)">${p.name.replace(line.substr(0,3)+' ','')}</span><span style="color:var(--orange);font-weight:700">${F(p.precio)}</span></div>`;
+    });
+    cardHTML += '</div>';
+  });
+  cardHTML += `<div style="font-size:10px;color:var(--dark-cream);opacity:.5;margin-top:8px">Precios ${g.inclIVA ? 'incluyen IVA '+((g.iva*100).toFixed(0))+'%' : 'sin IVA'} // salentino.co</div>`;
+  $('res-price-card').innerHTML = cardHTML;
+}
+
+const mixQtys = {};
+function onMixChange(key, el) {
+  const val = parseInt(el.value) || 0;
+  mixQtys[key] = Math.max(0, val);
+  renderResumen();
+}
+
+// ── Actual prices (IVA included) ──
+const ACTUAL_PRICES = {
+  // Tradicional: 250g($44k), 250g($54k — main), 454g, 1kg, 2.5kg
+  // Using $54k as the main 250g price point
+  'trad-0': 54000,  // 250g
+  'trad-1': 58000,  // 454g
+  'trad-2': 110000, // 1kg
+  'trad-3': 262000, // 2.5kg
+  // Especiales
+  'esp-0': 60000,   // 250g Borbon estandar
+  'esp-1': 85000,   // 454g (Premium tier)
+  'esp-2': 160000,  // 1kg (estimado — confirmar)
+  'esp-3': 380000,  // 2.5kg (estimado — confirmar)
+  // Cold Brew
+  'cb-0': 10000,    // Botella 250ml
+  'cb-1': 36000,    // 4-Pack
+  'cb-2': 67000,    // Galon 3.8L
+};
+
+function loadPrices(tab) {
+  Object.keys(ACTUAL_PRICES).forEach(key => {
+    if (key.startsWith(tab + '-')) {
+      manualPrices[key] = ACTUAL_PRICES[key];
+    }
+  });
+  recalcAll();
+}
+
+function clearPrices() {
+  Object.keys(manualPrices).forEach(k => delete manualPrices[k]);
+  recalcAll();
+}
+
+// ── Explainer: fixed costs ──
+function updateExplainer() {
+  const fijos = V('g-fijos');
+  const uds = V('g-unidades');
+  const fijosPorUd = uds > 0 ? fijos / uds : 0;
+
+  // Estimate avg contribution margin from current data
+  // Use a rough $20k avg utilidad per unit at 55% margin
+  const g = G();
+  const avgCosto = 15000; // rough average cost base
+  const avgPrecio = precioDesdeMargen(avgCosto, g.margenDir, g);
+  const avgNeto = g.inclIVA ? avgPrecio / (1 + g.iva) : avgPrecio;
+  const avgContrib = avgNeto * (1 - g.comision) - avgCosto;
+  const breakEven = avgContrib > 0 ? Math.ceil(fijos / avgContrib) : 0;
+
+  $('ex-grid').innerHTML = `
+    <div class="ex-box">
+      <div class="ex-val">${F(fijos)}</div>
+      <div class="ex-lbl">costos fijos / mes</div>
+    </div>
+    <div class="ex-box">
+      <div class="ex-val">${F(fijosPorUd)}</div>
+      <div class="ex-lbl">fijos por unidad (${uds} uds)</div>
+    </div>
+    <div class="ex-box">
+      <div class="ex-val">${breakEven > 0 ? breakEven + ' uds' : '---'}</div>
+      <div class="ex-lbl">punto de equilibrio / mes</div>
+    </div>
+    <div class="ex-box">
+      <div class="ex-val">${Fp(g.margenDir)}</div>
+      <div class="ex-lbl">margen objetivo directo</div>
+    </div>
+  `;
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  sumFijos();
+  recalcAll();
+});
+</script>
+</body>
+</html>
