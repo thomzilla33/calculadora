@@ -374,15 +374,42 @@ body{font-family:var(--font);background:var(--cream);color:var(--brown);line-hei
       <div class="result-value num" id="g-fijos-total"></div>
     </div>
     <input type="hidden" id="g-fijos" value="7000000">
-    <div class="param-grid" style="margin-top:8px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin:12px 0 8px">Overhead de produccion</div>
+    <div class="param-grid">
       <div class="input-row">
         <div class="input-label">
-          <strong>Unidades estimadas / mes</strong>
-          <span class="input-hint">total bolsas + botellas que vendes</span>
+          <strong>Overhead produccion / mes</strong>
+          <span class="input-hint">porcion de costos fijos asignada a produccion (se reparte entre todas las lineas)</span>
         </div>
-        <div class="input-field"><input type="number" id="g-unidades" value="300" min="1" oninput="recalcAll()"></div>
+        <div class="input-field"><input type="number" id="g-overhead-prod" value="500000" min="0" oninput="recalcAll()"></div>
+        <div class="input-unit">$/mes</div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin:12px 0 8px">Unidades estimadas / mes por linea</div>
+    <div class="param-grid">
+      <div class="input-row">
+        <div class="input-label"><strong>Especiales</strong><span class="input-hint">bolsas de cafe especial</span></div>
+        <div class="input-field"><input type="number" id="g-uds-esp" value="40" min="0" oninput="recalcAll()"></div>
         <div class="input-unit">uds</div>
       </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Tradicional</strong><span class="input-hint">bolsas de cafe tradicional</span></div>
+        <div class="input-field"><input type="number" id="g-uds-trad" value="130" min="0" oninput="recalcAll()"></div>
+        <div class="input-unit">uds</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Cold Brew</strong><span class="input-hint">botellas + 4-packs + galones (cada uno = 1 ud)</span></div>
+        <div class="input-field"><input type="number" id="g-uds-cb" value="100" min="0" oninput="recalcAll()"></div>
+        <div class="input-unit">uds</div>
+      </div>
+    </div>
+    <div class="result-row subtle" style="margin-top:4px">
+      <div class="result-label">Total unidades / mes</div>
+      <div class="result-value num" id="g-total-uds"></div>
+    </div>
+    <div class="result-row highlight">
+      <div class="result-label"><strong>Overhead por unidad</strong></div>
+      <div class="result-value num" id="g-overhead-unit"></div>
     </div>
     <div class="divider"></div>
     <div style="margin-top:4px">
@@ -748,7 +775,7 @@ body{font-family:var(--font);background:var(--cream);color:var(--brown);line-hei
       <span class="sec-label">Volumen de produccion</span>
       <span class="sec-hint">a mayor volumen, menor costo por unidad</span>
     </div>
-    <p class="text-sm" style="margin-bottom:12px">El overhead mensual (arriendo, equipos) se diluye entre mas botellas. A mayor volumen, menor costo por unidad.</p>
+    <p class="text-sm" style="margin-bottom:12px">El overhead de produccion se reparte entre todas las lineas (ver parametros globales). Aqui se configura el fijo por lote de CB y el volumen mensual.</p>
     <div class="input-row">
       <div class="input-label">
         <strong>Lotes por mes</strong>
@@ -765,14 +792,6 @@ body{font-family:var(--font);background:var(--cream);color:var(--brown);line-hei
       <div class="input-field"><input type="number" id="cb-fijo-lote" value="15000" min="0" oninput="calcCB()"></div>
       <div class="input-unit">$/lote</div>
     </div>
-    <div class="input-row">
-      <div class="input-label">
-        <strong>Overhead mensual CB</strong>
-        <span class="input-hint">Porcion de arriendo, equipos, seguros asignada a cold brew</span>
-      </div>
-      <div class="input-field"><input type="number" id="cb-overhead-mes" value="500000" min="0" oninput="calcCB()"></div>
-      <div class="input-unit">$/mes</div>
-    </div>
     <div class="divider"></div>
     <div class="result-row subtle">
       <div class="result-label">Botellas totales / mes</div>
@@ -783,11 +802,11 @@ body{font-family:var(--font);background:var(--cream);color:var(--brown);line-hei
       <div class="result-value num" id="cb-fijo-bot"></div>
     </div>
     <div class="result-row subtle">
-      <div class="result-label">Overhead mensual / botella</div>
+      <div class="result-label">Overhead global / unidad</div>
       <div class="result-value num" id="cb-overhead-bot"></div>
     </div>
     <div class="result-row highlight">
-      <div class="result-label"><strong>Costo total por botella (cafe + fijos)</strong></div>
+      <div class="result-label"><strong>Costo total por botella (cafe + fijo lote + overhead)</strong></div>
       <div class="result-value num" id="cb-total-bot"></div>
     </div>
 
@@ -956,7 +975,31 @@ body{font-family:var(--font);background:var(--cream);color:var(--brown);line-hei
       <span class="sec-label">Resumen evento</span>
       <span class="sec-hint">cuantos vasos, cuanto cobrar</span>
     </div>
-    <p class="text-sm" style="margin-bottom:12px">Define el tamano del evento y ve el costo total, precio sugerido por vaso, y utilidad.</p>
+    <p class="text-sm" style="margin-bottom:12px">Define el tamano del evento, equipo barista, y precios de venta por tipo de bebida.</p>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:8px">Equipo barista</div>
+    <div class="param-grid">
+      <div class="input-row">
+        <div class="input-label"><strong>Baristas</strong><span class="input-hint">cantidad de baristas en el evento</span></div>
+        <div class="input-field"><input type="number" id="ev-baristas" value="1" min="1" oninput="calcEventos()"></div>
+        <div class="input-unit">personas</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Horas por barista</strong><span class="input-hint">duracion del evento + montaje/desmontaje</span></div>
+        <div class="input-field"><input type="number" id="ev-horas" value="5" min="1" oninput="calcEventos()"></div>
+        <div class="input-unit">horas</div>
+      </div>
+      <div class="input-row">
+        <div class="input-label"><strong>Costo por hora barista</strong></div>
+        <div class="input-field"><input type="number" id="ev-costo-hora" value="15000" min="0" oninput="calcEventos()"></div>
+        <div class="input-unit">$/hora</div>
+      </div>
+    </div>
+    <div class="result-row subtle" style="margin:8px 0">
+      <div class="result-label">Costo total baristas</div>
+      <div class="result-value num" id="ev-costo-baristas"></div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin:12px 0 8px">Volumen y precios</div>
     <div class="param-grid">
       <div class="input-row">
         <div class="input-label"><strong>Vasos frios (CB)</strong></div>
@@ -964,17 +1007,26 @@ body{font-family:var(--font);background:var(--cream);color:var(--brown);line-hei
         <div class="input-unit">vasos</div>
       </div>
       <div class="input-row">
+        <div class="input-label"><strong>Precio venta frio</strong><span class="input-hint">por vaso de cold brew</span></div>
+        <div class="input-field"><input type="number" id="ev-precio-frio" value="8000" min="0" oninput="calcEventos()"></div>
+        <div class="input-unit">$/vaso</div>
+      </div>
+      <div class="input-row">
         <div class="input-label"><strong>Vasos calientes</strong></div>
         <div class="input-field"><input type="number" id="ev-qty-calientes" value="30" min="0" oninput="calcEventos()"></div>
         <div class="input-unit">vasos</div>
       </div>
       <div class="input-row">
-        <div class="input-label"><strong>Precio venta por vaso</strong></div>
-        <div class="input-field"><input type="number" id="ev-precio-vaso" value="8000" min="0" oninput="calcEventos()"></div>
+        <div class="input-label"><strong>Precio venta caliente</strong><span class="input-hint">por taza de Aeropress</span></div>
+        <div class="input-field"><input type="number" id="ev-precio-caliente" value="6000" min="0" oninput="calcEventos()"></div>
         <div class="input-unit">$/vaso</div>
       </div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin:12px 0 8px">Costos adicionales</div>
+    <div class="param-grid">
       <div class="input-row">
-        <div class="input-label"><strong>Logistica evento</strong><span class="input-hint">transporte, mesa, setup, hora</span></div>
+        <div class="input-label"><strong>Logistica evento</strong><span class="input-hint">transporte, mesa, setup</span></div>
         <div class="input-field"><input type="number" id="ev-logistica" value="150000" min="0" oninput="calcEventos()"></div>
         <div class="input-unit">$/evento</div>
       </div>
@@ -1080,6 +1132,12 @@ function sumFijos() {
   recalcAll();
 }
 
+function updateOverheadDisplay() {
+  const g = G();
+  $('g-total-uds').textContent = g.totalUds.toLocaleString('es-CO');
+  $('g-overhead-unit').textContent = F(g.overheadPerUnit);
+}
+
 function G() {
   const comision = V('g-comision') / 100;
   const iva = V('g-iva') / 100;
@@ -1096,7 +1154,13 @@ function G() {
   const envioB2B = V('g-envio-b2b');
   const envioDist = V('g-envio-dist');
   const fijos = V('g-fijos');
-  return { comision, iva, inclIVA, laborRate, laborBolsa, margenDir, margenB2B, descT1, descT2, descT3, envioDir, envioB2B, envioDist, fijos };
+  const overheadProd = V('g-overhead-prod');
+  const udsEsp = V('g-uds-esp');
+  const udsTrad = V('g-uds-trad');
+  const udsCB = V('g-uds-cb');
+  const totalUds = udsEsp + udsTrad + udsCB;
+  const overheadPerUnit = totalUds > 0 ? overheadProd / totalUds : 0;
+  return { comision, iva, inclIVA, laborRate, laborBolsa, margenDir, margenB2B, descT1, descT2, descT3, envioDir, envioB2B, envioDist, fijos, overheadProd, totalUds, overheadPerUnit };
 }
 
 function onEspTipo() {
@@ -1143,7 +1207,7 @@ function togglePanel(el) {
   el.classList.toggle('open');
   $('global-panel').classList.toggle('open');
 }
-function recalcAll() { calcEsp(); calcTrad(); calcCB(); calcEventos(); updateExplainer(); savePricesToLS(); }
+function recalcAll() { updateOverheadDisplay(); calcEsp(); calcTrad(); calcCB(); calcEventos(); updateExplainer(); savePricesToLS(); }
 
 // Store manual price overrides: key = "tab-idx" → price
 let manualPrices = loadPricesFromLS();
@@ -1243,7 +1307,6 @@ function calcCB() {
   const minLote = V('cb-min-lote');
   const lotesMes = Math.max(1, V('cb-lotes-mes') || 4);
   const fijoLote = V('cb-fijo-lote') || 0;
-  const overheadMes = V('cb-overhead-mes') || 0;
   const g = G();
 
   const loteCosto = loteKg * tostado;
@@ -1251,30 +1314,27 @@ function calcCB() {
   const laborPorBot = botellas > 0 ? (minLote / 60) * g.laborRate / botellas : 0;
   const fijoBot = botellas > 0 ? fijoLote / botellas : 0;
   const botsMes = botellas * lotesMes;
-  const overheadBot = botsMes > 0 ? overheadMes / botsMes : 0;
-  const totalFijoBot = fijoBot + overheadBot;
 
   $('cb-lote-costo').textContent = F(loteCosto);
   $('cb-cafe-bot').textContent = F(cafePorBot);
 
   $('cb-bots-mes').textContent = botsMes.toLocaleString('es-CO');
   $('cb-fijo-bot').textContent = F(fijoBot);
-  if ($('cb-overhead-bot')) $('cb-overhead-bot').textContent = F(overheadBot);
-  $('cb-total-bot').textContent = F(cafePorBot + totalFijoBot);
+  if ($('cb-overhead-bot')) $('cb-overhead-bot').textContent = F(g.overheadPerUnit);
+  $('cb-total-bot').textContent = F(cafePorBot + fijoBot + g.overheadPerUnit);
 
-  renderCBVolumeTable(cafePorBot, fijoLote, botellas, laborPorBot, overheadMes, lotesMes);
+  renderCBVolumeTable(cafePorBot, fijoLote, botellas, laborPorBot, lotesMes, g);
 
   const cafeGalon = agua > 0 ? (3.8 / agua) * loteCosto : 0;
   const laborGalon = agua > 0 ? (3.8 / agua) * (minLote / 60) * g.laborRate : 0;
   const fijoGalon = agua > 0 ? (3.8 / agua) * fijoLote : 0;
-  const overheadGalon = botsMes > 0 ? overheadMes * (3.8 / (0.25 * botsMes)) : 0;
 
   const pres = [
-    { name: 'Botella 250ml', cafe: cafePorBot, emp: EMP_CB, labor: laborPorBot, fijo: totalFijoBot,
+    { name: 'Botella 250ml', cafe: cafePorBot, emp: EMP_CB, labor: laborPorBot, fijo: fijoBot + g.overheadPerUnit,
       detailFn: (t) => Fd(t / 250, 2) + '/ml' },
-    { name: '4-Pack', cafe: cafePorBot * 4, emp: EMP_4P, labor: laborPorBot * 4, fijo: totalFijoBot * 4,
+    { name: '4-Pack', cafe: cafePorBot * 4, emp: EMP_4P, labor: laborPorBot * 4, fijo: (fijoBot * 4) + g.overheadPerUnit,
       detailFn: (t) => F(t / 4) + '/bot equiv.' },
-    { name: 'Galon 3.8L', cafe: cafeGalon, emp: EMP_GAL, labor: laborGalon, fijo: fijoGalon + overheadGalon,
+    { name: 'Galon 3.8L', cafe: cafeGalon, emp: EMP_GAL, labor: laborGalon, fijo: fijoGalon + g.overheadPerUnit,
       detailFn: (t) => Fd(t / 3800, 2) + '/ml' },
   ];
 
@@ -1282,7 +1342,7 @@ function calcCB() {
   renderCBChannelTable('cb-channels', pres);
 }
 
-function renderCBVolumeTable(cafePorBot, fijoLote, botellas, laborPorBot, overheadMes, currentLotes) {
+function renderCBVolumeTable(cafePorBot, fijoLote, botellas, laborPorBot, currentLotes, g) {
   const tiers = [1, 2, 4, 8, 12, 16];
   if (!tiers.includes(currentLotes)) tiers.push(currentLotes);
   tiers.sort((a, b) => a - b);
@@ -1290,24 +1350,26 @@ function renderCBVolumeTable(cafePorBot, fijoLote, botellas, laborPorBot, overhe
   const rows = tiers.map(l => {
     const bots = botellas * l;
     const fijoPorBot = botellas > 0 ? fijoLote / botellas : 0;
-    const overheadPorBot = bots > 0 ? overheadMes / bots : 0;
-    const totalBot = cafePorBot + fijoPorBot + overheadPorBot + laborPorBot + EMP_CB;
+    // Recalculate overhead assuming CB units change with volume
+    const totalUds = g.udsEsp + g.udsTrad + bots;
+    const ohPerUnit = totalUds > 0 ? g.overheadProd / totalUds : 0;
+    const totalBot = cafePorBot + fijoPorBot + ohPerUnit + laborPorBot + EMP_CB;
     const isCurrent = l === currentLotes;
     return `<tr${isCurrent ? ' style="background:var(--orange-subtle);font-weight:700"' : ''}>
       <td>${l}</td>
       <td>${bots.toLocaleString('es-CO')}</td>
       <td>${F(fijoPorBot)}</td>
-      <td>${F(overheadPorBot)}</td>
+      <td>${F(ohPerUnit)}</td>
       <td>${F(totalBot)}</td>
     </tr>`;
   }).join('');
 
   $('cb-volume-table').innerHTML = `
     <table class="channel-table" style="font-size:12px">
-      <thead><tr><th>Lotes/mes</th><th>Botellas</th><th>Fijo/bot</th><th>Overhead/bot</th><th>Costo total/bot</th></tr></thead>
+      <thead><tr><th>Lotes/mes</th><th>Botellas</th><th>Fijo/bot</th><th>Overhead/ud</th><th>Costo total/bot</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <p class="text-sm mt-8">Fijo/bot = constante por lote // Overhead/bot baja con mas volumen</p>`;
+    <p class="text-sm mt-8">Fijo/bot = constante por lote // Overhead/ud = global repartido entre todas las lineas</p>`;
 }
 
 // ── Shared renderers ──
@@ -1339,7 +1401,8 @@ function renderPresWithPricing(containerId, tab, pres, tostadoKg, type) {
   $(containerId).innerHTML = pres.map((p, i) => {
     const cafe = tostadoKg * p.peso;
     const labor = g.laborBolsa;
-    const costoBase = cafe + p.emp + labor;
+    const overhead = g.overheadPerUnit;
+    const costoBase = cafe + p.emp + labor + overhead;
     const porG = costoBase / (p.peso * 1000);
 
     const key = tab + '-' + i;
@@ -1363,13 +1426,14 @@ function renderPresWithPricing(containerId, tab, pres, tostadoKg, type) {
       <div class="pres-card">
         <div class="pres-name">${p.name}</div>
         <div class="pres-cost">${F(costoBase)}</div>
-        <div class="pres-sub">costo variable</div>
+        <div class="pres-sub">costo absorbido</div>
         <div class="pres-detail">${Fd(porG, 1)}/g</div>
         <div class="pres-breakdown">
           <div class="bk-row"><span>Cafe (${p.peso} kg)</span><span>${F(cafe)}</span></div>
           <div class="bk-row"><span>Empaque</span><span>${F(p.emp)}</span></div>
           <div class="bk-row"><span>Mano de obra</span><span>${F(labor)}</span></div>
-          <div class="bk-row total"><span>Costo base</span><span>${F(costoBase)}</span></div>
+          <div class="bk-row"><span>Overhead</span><span>${F(overhead)}</span></div>
+          <div class="bk-row total"><span>Costo absorbido</span><span>${F(costoBase)}</span></div>
         </div>
         <div class="pres-price-section">
           <div class="price-input-label">escribe tu precio // o usa el sugerido</div>
@@ -1381,7 +1445,7 @@ function renderPresWithPricing(containerId, tab, pres, tostadoKg, type) {
             <span class="margin-badge ${mc}">margen ${Fp(margen)}</span>
           </div>
           <div class="pres-price-row"><span class="pres-price-label">Ingreso neto${g.inclIVA?' (sin IVA)':''}</span><span class="pres-price-val">${F(neto)}</span></div>
-          <div class="pres-price-row"><span class="pres-price-label">- Costo base</span><span class="pres-price-val">${F(costoBase)}</span></div>
+          <div class="pres-price-row"><span class="pres-price-label">- Costo absorbido</span><span class="pres-price-val">${F(costoBase)}</span></div>
           <div class="pres-price-row"><span class="pres-price-label">- Comision (${(g.comision*100).toFixed(1)}%)</span><span class="pres-price-val">${F(comisionVal)}</span></div>
           <div class="pres-price-row" style="border-top:1px solid var(--dark-cream);margin-top:4px;padding-top:6px"><span class="pres-price-label" style="font-weight:700">= Utilidad por unidad</span><span class="pres-price-val" style="color:${utilidad >= 0 ? 'var(--orange)' : 'var(--red)'}">${F(utilidad)}</span></div>
           ${peHTML(utilidad, g.fijos)}
@@ -1418,14 +1482,14 @@ function renderCBPresWithPricing(containerId, pres) {
       <div class="pres-card">
         <div class="pres-name">${p.name}</div>
         <div class="pres-cost">${F(costoBase)}</div>
-        <div class="pres-sub">costo total (variable + fijo lote)</div>
+        <div class="pres-sub">costo absorbido</div>
         <div class="pres-detail">${detail}</div>
         <div class="pres-breakdown">
           <div class="bk-row"><span>Cafe</span><span>${F(p.cafe)}</span></div>
           <div class="bk-row"><span>Empaque / materiales</span><span>${F(p.emp)}</span></div>
           <div class="bk-row"><span>Mano de obra</span><span>${F(p.labor)}</span></div>
-          <div class="bk-row"><span>Fijo lote (gas, agua, setup)</span><span>${F(fijo)}</span></div>
-          <div class="bk-row total"><span>Costo base</span><span>${F(costoBase)}</span></div>
+          <div class="bk-row"><span>Fijo lote + overhead</span><span>${F(fijo)}</span></div>
+          <div class="bk-row total"><span>Costo absorbido</span><span>${F(costoBase)}</span></div>
         </div>
         <div class="pres-price-section">
           <div class="price-input-label">escribe tu precio // o usa el sugerido</div>
@@ -1437,7 +1501,7 @@ function renderCBPresWithPricing(containerId, pres) {
             <span class="margin-badge ${mc}">margen ${Fp(margen)}</span>
           </div>
           <div class="pres-price-row"><span class="pres-price-label">Ingreso neto${g.inclIVA?' (sin IVA)':''}</span><span class="pres-price-val">${F(neto)}</span></div>
-          <div class="pres-price-row"><span class="pres-price-label">- Costo base</span><span class="pres-price-val">${F(costoBase)}</span></div>
+          <div class="pres-price-row"><span class="pres-price-label">- Costo absorbido</span><span class="pres-price-val">${F(costoBase)}</span></div>
           <div class="pres-price-row"><span class="pres-price-label">- Comision (${(g.comision*100).toFixed(1)}%)</span><span class="pres-price-val">${F(comisionVal)}</span></div>
           <div class="pres-price-row" style="border-top:1px solid var(--dark-cream);margin-top:4px;padding-top:6px"><span class="pres-price-label" style="font-weight:700">= Utilidad por unidad</span><span class="pres-price-val" style="color:${utilidad >= 0 ? 'var(--orange)' : 'var(--red)'}">${F(utilidad)}</span></div>
           ${peHTML(utilidad, g.fijos)}
@@ -1458,7 +1522,7 @@ function renderChannelTable(containerId, tab, pres, tostadoKg, type) {
   let rows = pres.map((p, i) => {
     const cafe = tostadoKg * p.peso;
     const labor = g.laborBolsa;
-    const costoBase = cafe + p.emp + labor;
+    const costoBase = cafe + p.emp + labor + g.overheadPerUnit;
 
     const key = tab + '-' + i;
     const manual = manualPrices[key];
@@ -1572,16 +1636,12 @@ function calcEventos() {
   const cbAgua = V('cb-agua');
   const cbBots = V('cb-botellas');
   const cbMinLote = V('cb-min-lote');
-  const cbLotesMes = Math.max(1, V('cb-lotes-mes') || 4);
   const cbFijoLote = V('cb-fijo-lote') || 0;
-  const cbOverhead = V('cb-overhead-mes') || 0;
   const loteCosto = cbLoteKg * cbTostado;
-  const botsMes = cbBots * cbLotesMes;
   const cafeGal = cbAgua > 0 ? (3.8 / cbAgua) * loteCosto : 0;
   const laborGal = cbAgua > 0 ? (3.8 / cbAgua) * (cbMinLote/60) * g.laborRate : 0;
   const fijoGal = cbAgua > 0 ? (3.8 / cbAgua) * cbFijoLote : 0;
-  const ohGal = botsMes > 0 ? cbOverhead * (3.8 / (0.25 * botsMes)) : 0;
-  const galonCosto = cafeGal + EMP_GAL + laborGal + fijoGal + ohGal;
+  const galonCosto = cafeGal + EMP_GAL + laborGal + fijoGal + g.overheadPerUnit;
   $('ev-galon-costo').value = Math.round(galonCosto);
 
   // CB beverages
@@ -1656,10 +1716,18 @@ function calcEventos() {
       </div>
     </div>`;
 
+  // Barista costs
+  const baristas = V('ev-baristas');
+  const horas = V('ev-horas');
+  const costoHora = V('ev-costo-hora');
+  const costoBaristas = baristas * horas * costoHora;
+  $('ev-costo-baristas').textContent = F(costoBaristas);
+
   // Event summary
   const qtyFrios = V('ev-qty-frios');
   const qtyCalientes = V('ev-qty-calientes');
-  const precioVaso = V('ev-precio-vaso');
+  const precioFrio = V('ev-precio-frio');
+  const precioCal = V('ev-precio-caliente');
   const logistica = V('ev-logistica');
 
   // Use avg CB cost (with leche as default mix)
@@ -1668,17 +1736,24 @@ function calcEventos() {
   const totalCostoCalientes = qtyCalientes * costoHot;
   const totalCostoVar = totalCostoFrios + totalCostoCalientes;
   const totalVasos = qtyFrios + qtyCalientes;
-  const totalIngreso = totalVasos * precioVaso;
+  const ingresoFrios = qtyFrios * precioFrio;
+  const ingresoCalientes = qtyCalientes * precioCal;
+  const totalIngreso = ingresoFrios + ingresoCalientes;
   const totalNeto = g.inclIVA ? totalIngreso / (1 + g.iva) : totalIngreso;
   const comision = totalNeto * g.comision;
-  const utilEvento = totalNeto - totalCostoVar - comision - logistica;
+  const utilEvento = totalNeto - totalCostoVar - comision - costoBaristas - logistica;
 
   $('ev-resumen').innerHTML = `
     <div class="pres-breakdown" style="font-size:13px">
-      <div class="bk-row"><span>Ingreso (${totalVasos} vasos x ${F(precioVaso)})</span><span>${F(totalIngreso)}</span></div>
+      <div class="bk-row" style="font-weight:700;color:var(--black)"><span>Ingresos</span><span></span></div>
+      <div class="bk-row"><span>Frios (${qtyFrios} x ${F(precioFrio)})</span><span>${F(ingresoFrios)}</span></div>
+      <div class="bk-row"><span>Calientes (${qtyCalientes} x ${F(precioCal)})</span><span>${F(ingresoCalientes)}</span></div>
+      <div class="bk-row" style="border-top:1px solid var(--dark-cream);padding-top:4px"><span><strong>Ingreso bruto</strong></span><span><strong>${F(totalIngreso)}</strong></span></div>
       ${g.inclIVA ? `<div class="bk-row"><span>Ingreso neto (sin IVA ${(g.iva*100).toFixed(0)}%)</span><span>${F(totalNeto)}</span></div>` : ''}
-      <div class="bk-row"><span>- Costo frios (${qtyFrios} x ${F(avgCBCosto)} avg)</span><span>${F(totalCostoFrios)}</span></div>
-      <div class="bk-row"><span>- Costo calientes (${qtyCalientes} x ${F(costoHot)})</span><span>${F(totalCostoCalientes)}</span></div>
+      <div class="bk-row" style="font-weight:700;color:var(--black);margin-top:8px"><span>Costos</span><span></span></div>
+      <div class="bk-row"><span>- Materia prima frios (${qtyFrios} x ${F(avgCBCosto)})</span><span>${F(totalCostoFrios)}</span></div>
+      <div class="bk-row"><span>- Materia prima calientes (${qtyCalientes} x ${F(costoHot)})</span><span>${F(totalCostoCalientes)}</span></div>
+      <div class="bk-row"><span>- Baristas (${baristas} x ${horas}h x ${F(costoHora)})</span><span>${F(costoBaristas)}</span></div>
       <div class="bk-row"><span>- Comision (${(g.comision*100).toFixed(1)}%)</span><span>${F(comision)}</span></div>
       <div class="bk-row"><span>- Logistica evento</span><span>${F(logistica)}</span></div>
       <div class="bk-row total"><span>= Utilidad del evento</span><span style="color:${utilEvento>=0?'var(--green)':'var(--red)'};font-size:18px">${F(utilEvento)}</span></div>
@@ -1686,6 +1761,10 @@ function calcEventos() {
     <div class="result-row ${utilEvento>=0?'highlight':''}" style="${utilEvento<0?'background:var(--red-bg)':''}; margin-top:12px">
       <div class="result-label"><strong>Margen del evento</strong></div>
       <div class="result-value" style="color:${utilEvento>=0?'var(--green)':'var(--red)'}">${totalNeto > 0 ? Fp(utilEvento / totalNeto) : '0%'}</div>
+    </div>
+    <div class="result-row subtle">
+      <div class="result-label">Costo por vaso promedio</div>
+      <div class="result-value num">${totalVasos > 0 ? F((totalCostoVar + costoBaristas) / totalVasos) : '$0'}</div>
     </div>
     <div class="result-row subtle">
       <div class="result-label">Galones de CB necesarios</div>
@@ -1710,7 +1789,7 @@ function getAllProducts() {
   const espPres = [{name:'Esp 250g',peso:0.25,emp:EMP_250},{name:'Esp 454g',peso:0.454,emp:EMP_454},{name:'Esp 1kg',peso:1,emp:EMP_454},{name:'Esp 2.5kg',peso:2.5,emp:EMP_454}];
   espPres.forEach((p,i) => {
     const cafe = espTostado * p.peso;
-    const costoBase = cafe + p.emp + g.laborBolsa;
+    const costoBase = cafe + p.emp + g.laborBolsa + g.overheadPerUnit;
     const key = 'esp-'+i;
     const manual = manualPrices[key];
     const precio = manual || precioDesdeMargen(costoBase + g.envioDir, g.margenDir, g);
@@ -1724,7 +1803,7 @@ function getAllProducts() {
   const tradPres = [{name:'Trad 250g',peso:0.25,emp:EMP_250},{name:'Trad 454g',peso:0.454,emp:EMP_454},{name:'Trad 1kg',peso:1,emp:EMP_454},{name:'Trad 2.5kg',peso:2.5,emp:EMP_454}];
   tradPres.forEach((p,i) => {
     const cafe = tradTostado * p.peso;
-    const costoBase = cafe + p.emp + g.laborBolsa;
+    const costoBase = cafe + p.emp + g.laborBolsa + g.overheadPerUnit;
     const key = 'trad-'+i;
     const manual = manualPrices[key];
     const precio = manual || precioDesdeMargen(costoBase + g.envioDir, g.margenDir, g);
@@ -1739,26 +1818,20 @@ function getAllProducts() {
   const cbAgua = V('cb-agua');
   const cbBots = V('cb-botellas');
   const cbMinLote = V('cb-min-lote');
-  const cbLotesMes = Math.max(1, V('cb-lotes-mes') || 4);
   const cbFijoLote = V('cb-fijo-lote') || 0;
-  const cbOverhead = V('cb-overhead-mes') || 0;
   const loteCosto = cbLoteKg * cbTostado;
   const cafePorBot = cbBots > 0 ? loteCosto / cbBots : 0;
   const laborPorBot = cbBots > 0 ? (cbMinLote / 60) * g.laborRate / cbBots : 0;
   const fijoBot = cbBots > 0 ? cbFijoLote / cbBots : 0;
-  const botsMes = cbBots * cbLotesMes;
-  const overheadBot = botsMes > 0 ? cbOverhead / botsMes : 0;
-  const totalFijoBot = fijoBot + overheadBot;
 
   const cafeGal = cbAgua > 0 ? (3.8/cbAgua) * loteCosto : 0;
   const laborGal = cbAgua > 0 ? (3.8/cbAgua) * (cbMinLote/60) * g.laborRate : 0;
   const fijoGal = cbAgua > 0 ? (3.8/cbAgua) * cbFijoLote : 0;
-  const ohGal = botsMes > 0 ? cbOverhead * (3.8/(0.25*botsMes)) : 0;
 
   const cbItems = [
-    { name:'CB Botella', cafe:cafePorBot, emp:EMP_CB, labor:laborPorBot, fijo:totalFijoBot, dq:80 },
-    { name:'CB 4-Pack', cafe:cafePorBot*4, emp:EMP_4P, labor:laborPorBot*4, fijo:totalFijoBot*4, dq:10 },
-    { name:'CB Galon', cafe:cafeGal, emp:EMP_GAL, labor:laborGal, fijo:fijoGal+ohGal, dq:8 },
+    { name:'CB Botella', cafe:cafePorBot, emp:EMP_CB, labor:laborPorBot, fijo:fijoBot + g.overheadPerUnit, dq:80 },
+    { name:'CB 4-Pack', cafe:cafePorBot*4, emp:EMP_4P, labor:laborPorBot*4, fijo:(fijoBot*4) + g.overheadPerUnit, dq:10 },
+    { name:'CB Galon', cafe:cafeGal, emp:EMP_GAL, labor:laborGal, fijo:fijoGal + g.overheadPerUnit, dq:8 },
   ];
   cbItems.forEach((p,i) => {
     const costoBase = p.cafe + p.emp + p.labor + p.fijo;
@@ -1914,14 +1987,13 @@ function clearPrices() {
 
 // ── Explainer: fixed costs ──
 function updateExplainer() {
-  const fijos = V('g-fijos');
-  const uds = V('g-unidades');
+  const g = G();
+  const fijos = g.fijos;
+  const uds = g.totalUds;
   const fijosPorUd = uds > 0 ? fijos / uds : 0;
 
   // Estimate avg contribution margin from current data
-  // Use a rough $20k avg utilidad per unit at 55% margin
-  const g = G();
-  const avgCosto = 15000; // rough average cost base
+  const avgCosto = 15000 + g.overheadPerUnit; // rough average cost base with overhead
   const avgPrecio = precioDesdeMargen(avgCosto, g.margenDir, g);
   const avgNeto = g.inclIVA ? avgPrecio / (1 + g.iva) : avgPrecio;
   const avgContrib = avgNeto * (1 - g.comision) - avgCosto;
@@ -1933,8 +2005,8 @@ function updateExplainer() {
       <div class="ex-lbl">costos fijos / mes</div>
     </div>
     <div class="ex-box">
-      <div class="ex-val">${F(fijosPorUd)}</div>
-      <div class="ex-lbl">fijos por unidad (${uds} uds)</div>
+      <div class="ex-val">${F(g.overheadPerUnit)}</div>
+      <div class="ex-lbl">overhead / unidad (${uds} uds)</div>
     </div>
     <div class="ex-box">
       <div class="ex-val">${breakEven > 0 ? breakEven + ' uds' : '---'}</div>
